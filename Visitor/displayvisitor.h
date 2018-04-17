@@ -2,7 +2,8 @@
 #define DISPLAYVISITOR_H
 
 #include "abstractvisitor.h"
-#include "textfile.h"
+
+class TextFile;
 
 //this Class is to display a existing file when it's first loaded
 class DisplayVisitor: public AbstractVisitor

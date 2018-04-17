@@ -2,9 +2,10 @@
 #define APPLICATION_H
 
 #include <QObject>
-#include "textfile.h"
 #include <list>
 #include <QUrl>
+#include "textfile.h"
+
 
 class Application: public QObject
 {
@@ -13,7 +14,7 @@ public:
     Application();
 
     //triggered by 'open' button
-    Q_INVOKABLE bool addFile(QUrl address);
+    Q_INVOKABLE bool addFile(QUrl address = QUrl());
 
     //the three function is for currentFile
     //when save(As)?() is called, remeber to ask for URL when necessary

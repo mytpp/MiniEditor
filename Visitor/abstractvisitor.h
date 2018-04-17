@@ -2,7 +2,6 @@
 #define ABSTRACTVISITOR_H
 
 #include <QChar>
-#include <utility>
 
 class AbstractVisitor
 {

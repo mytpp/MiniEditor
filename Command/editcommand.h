@@ -3,8 +3,8 @@
 
 #include <utility>
 #include <QString>
-#include "textfile.h"
 
+class TextFile;
 
 class EditCommand
 {

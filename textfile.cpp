@@ -1,5 +1,9 @@
 #include "textfile.h"
+#include "clipboard.h"
+#include "textstructure.h"
 #include "Command/editcommand.h"
+#include "Visitor/abstractvisitor.h"
+
 
 TextFile::TextFile()
 {

@@ -1,20 +1,22 @@
 #ifndef TEXTSTRUCTURE_H
 #define TEXTSTRUCTURE_H
 
-#include "textrow.h"
 #include <list>
 #include <utility>
 
+class TextRow;
+class AbstractVisitor;
 
 class TextStructure
 {
 public:
     TextStructure();
 
-    QChar data(int row, int column);
+    //for every function that need position parameter(s),
+    //check if 'row' is a legal position, and let TextRow check if 'column' is legal,
+    //and send some message if the position is out of range
 
-    //bool push_back(QChar character);
-    //bool push_back(QString newString);
+    QChar data(std::pair<int,int> position);//seems useless
 
     //line-breaking character can be handled by these functions.
     //insert some content before the position point.
@@ -23,15 +25,13 @@ public:
     bool insert(std::pair<int,int> position, QChar character);
     //copy a paragraph may use this
     bool insert(std::pair<int,int> position, QString newString);
-    //used when loading a file
-    bool push_back(QChar character);
 
-    bool pop_back();
+
     bool erase(std::pair<int,int> position);
     bool erase(std::pair<int,int> begin, std::pair<int,int> end);
 
     //inner iterator
-    bool traverse(AbstractVisitor &visitor, std::pair<int,int> begin={0,0});
+    bool traverse(AbstractVisitor &visitor);
 
 private:
     //each line begin with a '\n' indicating this line exists

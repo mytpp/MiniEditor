@@ -3,15 +3,13 @@
 
 #include <QObject>
 #include <fstream>
-#include <QUrl>
-#include <stack>
-#include <QDebug>
 #include <memory>
-#include "clipboard.h"
-#include "textstructure.h"
-#include "Visitor/abstractvisitor.h"
+#include <QUrl>
+#include <QDebug>
 
+class TextStructure;
 class EditCommand;
+
 class TextFile: public QObject
 {
     Q_OBJECT
@@ -27,7 +25,7 @@ public:
     Q_INVOKABLE void saveFile(QUrl address);
     Q_INVOKABLE void close();
 
-    Q_INVOKABLE void cut(int rowBegin, int colBegin, int rowEnd, int colEnd);//use CutCommand inside
+    Q_INVOKABLE void cut(int rowBegin, int colBegin, int rowEnd, int colEnd);//use EraseCommand inside
     Q_INVOKABLE void copy(int rowBegin, int colBegin, int rowEnd, int colEnd);
     Q_INVOKABLE void paste(int row, int column, QString newString);          //use InsertCommand inside
 
@@ -67,7 +65,7 @@ signals:
 private:
     bool isModified;
     QUrl url;
-    TextStructure text;
+    std::shared_ptr<TextStructure> text;
     std::fstream file;
     std::list<EditCommand*> historyList;
 };

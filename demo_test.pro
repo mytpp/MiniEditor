@@ -13,7 +13,6 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += main.cpp \
-    fucklistmodel.cpp \
     textstructure.cpp \
     textrow.cpp \
     textfile.cpp \
@@ -24,7 +23,6 @@ SOURCES += main.cpp \
     Command/insertcommand.cpp \
     Command/erasecommand.cpp \
     clipboard.cpp \
-    Command/cutcommand.cpp \
     Command/replacecommand.cpp \
     Command/editcommand.cpp
 
@@ -42,7 +40,6 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
-    fucklistmodel.h \
     textstructure.h \
     textrow.h \
     textfile.h \
@@ -53,6 +50,5 @@ HEADERS += \
     Command/insertcommand.h \
     Command/erasecommand.h \
     clipboard.h \
-    Command/cutcommand.h \
     Command/replacecommand.h \
     Command/editcommand.h

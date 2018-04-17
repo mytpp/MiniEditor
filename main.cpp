@@ -1,7 +1,6 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
-#include "fucklistmodel.h"
 #include "application.h"
 
 int main(int argc, char *argv[])
@@ -13,10 +12,7 @@ int main(int argc, char *argv[])
 
     QQmlApplicationEngine engine;
 
-    fuckListModel shit;
     QQmlContext *root=engine.rootContext();
-    root->setContextProperty("shit",&shit);
-
     Application myapp;
     root->setContextProperty("app", &myapp);
 

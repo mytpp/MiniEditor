@@ -1,4 +1,5 @@
 #include "erasecommand.h"
+#include "textfile.h"
 
 EraseCommand::EraseCommand(std::pair<int,int> pos, TextFile *inv)
 {

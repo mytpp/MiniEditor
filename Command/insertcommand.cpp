@@ -1,4 +1,5 @@
 #include "insertcommand.h"
+#include "textfile.h"
 
 InsertCommand::InsertCommand(std::pair<int,int> pos, QChar cha, TextFile *inv)
 {

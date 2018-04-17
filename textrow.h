@@ -3,7 +3,8 @@
 
 #include <vector>
 #include <QString>
-#include "visitor\abstractvisitor.h"
+
+class AbstractVisitor;
 
 class TextRow
 {
@@ -13,7 +14,7 @@ public:
     //this constructor may be called when a file is being loaded
     TextRow(QString text);
 
-    QChar& operator[](int position);
+    QChar& operator[](int position);//seems useless
 
     //int size();
     //int capacity();//only for debug
@@ -22,12 +23,11 @@ public:
     //consider its member function vector::reserve()
     bool insert(int position, QChar cha);
     bool insert(int position, QString str);
-    bool pop_back(QChar character);
 
     bool erase(int position);
     bool erase(int begin, int end);
 
-    bool traverse(AbstractVisitor &visitor, int begin=0);
+    bool traverse(AbstractVisitor &visitor);
 
 private:
     std::vector<QChar> row;

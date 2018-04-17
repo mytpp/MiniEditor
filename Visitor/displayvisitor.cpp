@@ -1,4 +1,5 @@
 #include "displayvisitor.h"
+#include "textfile.h"
 
 DisplayVisitor::DisplayVisitor()
 {

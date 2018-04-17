@@ -2,8 +2,9 @@
 #define REPLACECOMMAND_H
 
 #include "editcommand.h"
-#include "Visitor/searchvisitor.h"
+#include <memory>
 
+class SearchVisitor;
 
 class ReplaceCommand: public EditCommand
 {
