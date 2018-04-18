@@ -24,11 +24,11 @@
 |bool |erase(std::pair<int,int> begin, std::pair<int,int> end)|
 
 ## Property Documentation
+
+
+## Member Function Documentation
 **TextStructure::TextStructure()**
 构造函数
 
 **QChar TextStructure::data(int row, int column)**
 返回 row column 对应的字符
-
-## Member Function Documentation
-
