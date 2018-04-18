@@ -1,7 +1,8 @@
 #include "insertcommand.h"
 #include "textfile.h"
 
-InsertCommand::InsertCommand(std::pair<int,int> pos, QChar cha, TextFile *inv)
+InsertCommand::InsertCommand(std::pair<int,int> pos, QChar cha,
+                             std::shared_ptr<TextStructure> rec, TextFile *inv)
 {
     token=CHA;
 }
@@ -21,8 +22,3 @@ void InsertCommand::redo()
 
 }
 
-
-TextFile *InsertCommand::invoker()
-{
-    return _invoker;
-}

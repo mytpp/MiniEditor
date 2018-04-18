@@ -18,10 +18,9 @@
 QChar& | operator[](int position)
 bool | insert(int position, QChar cha)
 bool | insert(int position, QString str)
-bool | pop_back(QChar character)
 bool | erase(int position)
 bool | erase(int begin, int end)
-bool | traverse(AbstractVisitor &visitor, int begin=0)
+bool | traverse(AbstractVisitor &visitor)
 
 ## Property Documentation
 

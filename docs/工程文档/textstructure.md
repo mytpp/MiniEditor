@@ -18,10 +18,9 @@
 | QChar | data(int row, int column)|
 |bool |insert(std::pair<int,int> position, QChar character)|
 |bool |insert(std::pair<int,int> position, QString newString)|
-|bool | push_back(QChar character)|
-|bool | pop_back()|
 |bool |erase(std::pair<int,int> position)|
 |bool |erase(std::pair<int,int> begin, std::pair<int,int> end)|
+|bool |traverse(AbstractVisitor &visitor)|
 
 ## Property Documentation
 

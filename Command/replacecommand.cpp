@@ -2,7 +2,8 @@
 #include "Visitor/searchvisitor.h"
 #include "textfile.h"
 
-ReplaceCommand::ReplaceCommand(std::shared_ptr<SearchVisitor> RepVtr, QString fmt, QString str, TextFile *inv)
+ReplaceCommand::ReplaceCommand(std::shared_ptr<SearchVisitor> RepVtr, QString fmt, QString str,
+                               std::shared_ptr<TextStructure> rec, TextFile *inv)
 {
 
 }
@@ -23,7 +24,3 @@ void ReplaceCommand::redo()
 
 }
 
-TextFile *ReplaceCommand::invoker()
-{
-    return _invoker;
-}

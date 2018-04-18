@@ -10,9 +10,9 @@
 |-|-|-|
 private|bool | isModified;
 private|QUrl | url;
-private|TextStructure | text;
+private|std::shared_ptr\<TextStructure> | text;
 private|std::fstream | file;
-private|std::list<EditCommand*> | historyList;
+private|std::list\<EditCommand*> | historyList;
 
 ## Public Functions
 | 类型 |声明|

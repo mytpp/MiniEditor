@@ -10,6 +10,11 @@ public:
     ClipBoard& operator = (const ClipBoard&) = delete;
 
     static ClipBoard& instance();
+
+    static const QString& getContent(){
+        return content;
+    }
+
     static void setContent(QString str) {
         //may use squeeze() to avoid the capacity is far more than size
         content = str;

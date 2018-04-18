@@ -15,7 +15,8 @@
 |-|-|
 | |ClipBoard(const ClipBoard&) = delete
 | |ClipBoard& operator = (const ClipBoard&) = delete
-static | ClipBoard& instance()
+static ClipBoard& |  instance()
+static const QString&| getContent()
 static void | setContent(QString str)
 
 ## Protected Functions
