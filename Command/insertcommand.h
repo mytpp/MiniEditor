@@ -7,8 +7,10 @@
 class InsertCommand : public EditCommand
 {
 public:
-    InsertCommand(std::pair<int,int> pos, QChar cha, TextFile *inv  = nullptr);
-    InsertCommand(std::pair<int,int> pos, QString newString, TextFile *inv  = nullptr);
+    InsertCommand(std::pair<int,int> pos, QChar cha,
+                  std::shared_ptr<TextStructure> rec, TextFile *inv  = nullptr);
+    InsertCommand(std::pair<int,int> pos, QString newString,
+                  std::shared_ptr<TextStructure> rec, TextFile *inv  = nullptr);
 
     //consists of insert(); sendInsertSignal();
     virtual void operator ()() override;
@@ -16,8 +18,6 @@ public:
     virtual void undo() override;
     //consists of insert(); sendInsertSignal();
     virtual void redo() override;
-
-    virtual TextFile *invoker() override;
 
 private:
     void insert();
@@ -37,7 +37,8 @@ private:
     QChar charater;
     QString chunk;
     //to emit modification signal through _invoker(a TextFile)
-    TextFile *_invoker;
+    TextFile *invoker;
+    std::shared_ptr<TextStructure> receiver;
 };
 
 #endif // INSERTCOMMAND_H

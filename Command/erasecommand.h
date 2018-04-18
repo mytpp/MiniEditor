@@ -3,12 +3,13 @@
 
 #include "editcommand.h"
 
-
 class EraseCommand: public EditCommand
 {
 public:
-    EraseCommand(std::pair<int,int> pos, TextFile *inv = nullptr);
-    EraseCommand(std::pair<int,int> begin, std::pair<int,int> end, TextFile *inv = nullptr);
+    EraseCommand(std::pair<int,int> pos,
+                 std::shared_ptr<TextStructure> rec, TextFile *inv = nullptr);
+    EraseCommand(std::pair<int,int> begin, std::pair<int,int> end,
+                 std::shared_ptr<TextStructure> rec, TextFile *inv = nullptr);
 
     //consists of doCut(); erase(); sendEraseSignal();
     virtual void operator ()() override;
@@ -17,10 +18,7 @@ public:
     //consists of doCut(); erase(); sendEraseSignal();
     virtual void redo() override;
 
-    virtual TextFile *invoker() override;
-
 private:
-    virtual void doCut() {}  //for Template Method
     void insert();
     void erase();
 
@@ -37,7 +35,8 @@ private:
     QChar charater;
     QString chunk;
     //to emit modification signal through _invoker(a TextFile)
-    TextFile *_invoker;
+    TextFile *invoker;
+    std::shared_ptr<TextStructure> receiver;
 };
 
 #endif // ERASECOMMAND_H

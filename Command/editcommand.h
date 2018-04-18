@@ -3,8 +3,10 @@
 
 #include <utility>
 #include <QString>
+#include <memory>
 
 class TextFile;
+class TextStructure;
 
 class EditCommand
 {
@@ -15,8 +17,6 @@ public:
     virtual void operator()() = 0;
     virtual void undo() {}
     virtual void redo() {}
-
-    virtual TextFile *invoker() = 0;
 
 //protected:
 //    virtual void insert() {}
