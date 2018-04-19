@@ -2,5 +2,29 @@
     <qresource prefix="/">
         <file>main.qml</file>
         <file>qtquickcontrols2.conf</file>
+        <file>assets/fonts/fontawesome-webfont.eot</file>
+        <file>assets/fonts/fontawesome-webfont.svg</file>
+        <file>assets/fonts/fontawesome-webfont.ttf</file>
+        <file>assets/fonts/fontawesome-webfont.woff</file>
+        <file>assets/fonts/fontawesome-webfont.woff2</file>
+        <file>assets/fonts/FontAwesome.otf</file>
+        <file>Command/editcommand.cpp</file>
+        <file>Command/editcommand.h</file>
+        <file>Command/erasecommand.cpp</file>
+        <file>Command/erasecommand.h</file>
+        <file>Command/insertcommand.cpp</file>
+        <file>Command/insertcommand.h</file>
+        <file>Command/replacecommand.cpp</file>
+        <file>Command/replacecommand.h</file>
+        <file>Visitor/abstractvisitor.cpp</file>
+        <file>Visitor/abstractvisitor.h</file>
+        <file>Visitor/displayvisitor.cpp</file>
+        <file>Visitor/displayvisitor.h</file>
+        <file>Visitor/searchvisitor.cpp</file>
+        <file>Visitor/searchvisitor.h</file>
+        <file>application.cpp</file>
+        <file>application.h</file>
+        <file>clipboard.cpp</file>
+        <file>clipboard.h</file>
     </qresource>
 </RCC>
