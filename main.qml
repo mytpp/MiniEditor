@@ -130,7 +130,10 @@ ApplicationWindow {
     }
 
 
-    ScrollView {
+    /*Use Rectangle instead of ScrollView because
+     *a ListView inside of which caused tons of problems
+     *As the result, draw ScrollBar by self.*/
+    Rectangle {
         id:view
         width: parent.width
         anchors.top: iconBar.bottom
@@ -138,33 +141,83 @@ ApplicationWindow {
         anchors.left: parent.left
         anchors.leftMargin: 5
         height: root.height - (tabs.height + iconBar.height) - this.anchors.topMargin
+        clip: true
 
-        ScrollBar.horizontal.policy: ScrollBar.AlwaysOn
-        ScrollBar.vertical.policy: ScrollBar.AlwaysOn
 
-        ListView{
-            model: textModel
-            delegate: Row{
-                Repeater{
+//        ListView{
+//            model: textModel
+//            delegate: Row{
+//                Repeater{
+//                    model: attributes
+//                    delegate: Text {
+//                        property bool isSelected: false
+//                        z:2
+//                        text: description
+//                        Rectangle{
+//                            z:-1 //bellow the text
+//                            anchors.fill: parent
+//                            color: parent.isSelected ? "#66a9c9" : "white"
+//                        }
+//                        MouseArea{
+//                            anchors.fill: parent
+//                            onClicked: console.log(index);//index in line
+//                        }
+//                    }
+//                }
+//            }
+//        }
+
+        Component{
+            id:rowComp
+            Rectangle{
+                id:rowRec
+                height: 14
+                width: rowView.width
+                ListView{
+                    id:rowView
                     model: attributes
-                    delegate: Text {
-                        property bool isSelected: false
-                        z:2
+                    //anchors.fill: parent
+                    width: childrenRect.width
+                    orientation:ListView.Horizontal
+                    delegate:
+                        Text {
                         text: description
-                        Rectangle{
-                            z:-1 //bellow the text
-                            anchors.fill: parent
-                            color: parent.isSelected ? "#66a9c9" : "white"
-                        }
                         MouseArea{
                             anchors.fill: parent
-                            onClicked: console.log(index);//index in line
                         }
                     }
                 }
             }
         }
+
+        ListView{
+            x:-hbar.position*width
+            id:columnView
+            model: textModel
+            width: contentItem.childrenRect.width
+            height: parent.height
+            delegate: rowComp
+
+            MouseArea{
+                anchors.fill: parent
+                onClicked: {
+                    console.log(columnView.itemAt(mouseX, mouseY).children[0].itemAt(mouseX, 0).text)
+                    /*Find the item under cursor*/
+                }
+            }
+        }
+        ScrollBar {
+            id: hbar
+            hoverEnabled: true
+            active: hovered || pressed
+            orientation: Qt.Horizontal
+            size: view.width / columnView.contentItem.childrenRect.width
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+        }
     }
+
 
     /*Passage Here*/
     ListModel {
@@ -188,6 +241,40 @@ ApplicationWindow {
             attributes: [
                 ListElement { description: "f" },
                 ListElement { description: "g" }
+            ]
+        }
+    }
+
+    /*TESTING WARNING*/
+    ListModel{
+        id:textModel_E
+        ListElement {
+            rowItems: [
+                ListElement { description: "F" },
+                ListElement { description: "D" },
+                ListElement { description: "S" },
+                ListElement { description: "哈" },
+                ListElement { description: "哦" }
+            ]
+        }
+        ListElement {
+            rowItems: [
+                ListElement { description: "A" }
+            ]
+        }
+        ListElement {
+            rowItems: [
+                ListElement { description: "f" },
+                ListElement { description: "g" }
+            ]
+        }
+        ListElement {
+            rowItems: [
+                ListElement { description: "F" },
+                ListElement { description: "D" },
+                ListElement { description: "S" },
+                ListElement { description: "哈" },
+                ListElement { description: "哦" }
             ]
         }
     }
