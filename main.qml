@@ -116,6 +116,7 @@ ApplicationWindow {
 
 
         Rectangle {
+            anchors.fill: parent
              width: 200; height: 400
 
              ListModel {
@@ -158,6 +159,11 @@ ApplicationWindow {
                                  text: description
                                  MouseArea {
                                      anchors.fill: parent
+//                                     hoverEnabled: true
+//                                     onEntered: {
+//                                         console.log(index);
+//                                     }
+
                                      onClicked: {
                                          console.log(row.ind +"  "+model.index);
                                          cursor.x = cha.x;

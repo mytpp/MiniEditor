@@ -68,6 +68,7 @@ private:
     std::shared_ptr<TextStructure> text;
     std::fstream file;
     std::list<EditCommand*> historyList;
+    std::list<EditCommand*>::iterator nextCommand;
 };
 
 #endif // TEXTFILE_H
