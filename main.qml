@@ -144,8 +144,8 @@ ApplicationWindow {
 
         ListView{
             model: textModel
-            delegate: Row{
-                Repeater{
+            delegate: ListView{
+                    orientation: ListView.Horizontal
                     model: attributes
                     delegate: Text {
                         property bool isSelected: false
@@ -158,11 +158,16 @@ ApplicationWindow {
                         }
                         MouseArea{
                             anchors.fill: parent
+                            hoverEnabled: true
+                            onEntered: {
+                                console.log(index)
+                            }
+
                             onClicked: console.log(index);//index in line
                         }
                     }
                 }
-            }
+
         }
     }
 
@@ -186,7 +191,7 @@ ApplicationWindow {
         }
         ListElement {
             attributes: [
-                ListElement { description: "f" },
+                ListElement { description: "sss" },
                 ListElement { description: "g" }
             ]
         }

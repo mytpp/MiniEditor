@@ -22,7 +22,7 @@ public:
     Q_INVOKABLE void saveAs();
     //close current file
     //remeber to check if the file need saving
-    Q_INVOKABLE void close();
+    Q_INVOKABLE bool close();
 
     //close all files, triggered by 'quit' button
     Q_INVOKABLE void closeAll();

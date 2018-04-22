@@ -1,14 +1,14 @@
 #ifndef TEXTFILE_H
 #define TEXTFILE_H
 
+#include <QUrl>
 #include <QObject>
 #include <fstream>
 #include <memory>
-#include <QUrl>
+#include "Command/editcommand.h"
 #include <QDebug>
 
 class TextStructure;
-class EditCommand;
 
 class TextFile: public QObject
 {
@@ -22,8 +22,9 @@ public:
     //and display the file via QML
     TextFile(QUrl address);                                                  //use DisplayVisitor inside
 
-    Q_INVOKABLE void saveFile(QUrl address);
-    Q_INVOKABLE void close();
+    bool save();
+    bool saveAs();
+    bool canClose();
 
     Q_INVOKABLE void cut(int rowBegin, int colBegin, int rowEnd, int colEnd);//use EraseCommand inside
     Q_INVOKABLE void copy(int rowBegin, int colBegin, int rowEnd, int colEnd);
@@ -63,12 +64,15 @@ signals:
     //highlighting selected string (maybe in blue?) should be done just in QML, i.e. UI level.
 
 private:
-    bool isModified;
-    QUrl url;
+    bool saveFile(QUrl path);
+
+private:
+    bool isModified; //check if the file needs saving when closing it
+    QUrl url;        //url==QUrl() if the flie has been stored in hard drive
     std::shared_ptr<TextStructure> text;
     std::fstream file;
-    std::list<EditCommand*> historyList;
-    std::list<EditCommand*>::iterator nextCommand;
+    std::list<std::shared_ptr<EditCommand>> historyList;
+    std::list<std::shared_ptr<EditCommand>>::iterator nextCommand;
 };
 
 #endif // TEXTFILE_H

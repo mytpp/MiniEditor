@@ -1,4 +1,4 @@
-QT += quick
+QT += quick widgets
 CONFIG += c++11
 
 # The following define makes your compiler emit warnings if you use
@@ -22,9 +22,9 @@ SOURCES += main.cpp \
     Visitor/searchvisitor.cpp \
     Command/insertcommand.cpp \
     Command/erasecommand.cpp \
-    clipboard.cpp \
     Command/replacecommand.cpp \
-    Command/editcommand.cpp
+    Command/editcommand.cpp \
+    Visitor/savevisitor.cpp
 
 RESOURCES += qml.qrc
 
@@ -49,6 +49,6 @@ HEADERS += \
     Visitor/searchvisitor.h \
     Command/insertcommand.h \
     Command/erasecommand.h \
-    clipboard.h \
     Command/replacecommand.h \
-    Command/editcommand.h
+    Command/editcommand.h \
+    Visitor/savevisitor.h
