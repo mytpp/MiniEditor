@@ -142,6 +142,9 @@ ApplicationWindow {
         anchors.leftMargin: 5
         height: root.height - (tabs.height + iconBar.height) - this.anchors.topMargin
         clip: true
+        /*Clip the ListView inside, means this.height < columnView.height, and width.*/
+
+        property int fontPixelSize: 16//font size
 
 
 //        ListView{
@@ -167,11 +170,13 @@ ApplicationWindow {
 //            }
 //        }
 
+        /*定义每行的结构*/
+        //TODO:Animation
         Component{
             id:rowComp
             Rectangle{
                 id:rowRec
-                height: 14
+                height: view.fontPixelSize
                 width: rowView.width
                 ListView{
                     id:rowView
@@ -179,11 +184,18 @@ ApplicationWindow {
                     //anchors.fill: parent
                     width: childrenRect.width
                     orientation:ListView.Horizontal
-                    delegate:
-                        Text {
+                    delegate:Text {
+                        property bool isSelected: false
+                        property bool isHighlight: false
                         text: description
+                        font.pixelSize: view.fontPixelSize
                         MouseArea{
                             anchors.fill: parent
+                        }
+                        Rectangle{
+                            z:-1 //below text
+                            anchors.fill: parent
+                            color: parent.isSelected ? "#5698c3" : (parent.isHighlight ? "#fed71a" : "white")
                         }
                     }
                 }
@@ -191,21 +203,87 @@ ApplicationWindow {
         }
 
         ListView{
-            x:-hbar.position*width
             id:columnView
-            model: textModel
+            x:-hbar.position*width
+            interactive: false//disable drag
             width: contentItem.childrenRect.width
             height: parent.height
+            model: textModel
             delegate: rowComp
+
+            property bool isSelecting: false
+            property point selectStart: Qt.point(0, 0);
+            property point selectEnd: Qt.point(0, 0);
 
             MouseArea{
                 anchors.fill: parent
                 onClicked: {
-                    console.log(columnView.itemAt(mouseX, mouseY).children[0].itemAt(mouseX, 0).text)
-                    /*Find the item under cursor*/
+                    var targetRow = columnView.itemAt(mouseX, mouseY);
+                    var targetItem = targetRow.children[0].itemAt(mouseX, 0)
+                    console.log(targetItem.text)
+                    var element = {
+                        attributes:[]
+                    };
+                    for(var t = 0; t < Math.random() * 10; t++){
+                        element.attributes.push({description:"n"})
+                    }
+                    textModel.append(element);
+
+                    cursor.x = targetItem.x;
+                    cursor.y = targetRow.y;
+                }
+                onPressed: {
+                    parent.isSelecting = true;
+                }
+                onPositionChanged: {
+                    if(parent.isSelecting){
+                        var rowIndex = columnView.indexAt(mouseX, mouseY);
+                        var columnIndex = rowIndex !== -1 ? columnView.itemAt(mouseX, mouseY).children[0].indexAt(mouseX, 0) : -1;
+                        if(rowIndex >= 0 && columnIndex >= 0){
+                            console.log(rowIndex + ",", columnIndex);
+                        }
+                    }
+                }
+                onReleased: {
+                    parent.isSelecting = false;
+                }
+
+            }
+
+            Rectangle{
+                id:cursor
+                width: 2
+                height: view.fontPixelSize
+                x:0
+                y:0
+                color: "#1772b4"
+                radius: 1
+                SequentialAnimation{
+                    running: true
+                    loops: Animation.Infinite
+                    NumberAnimation{
+                        target: cursor
+                        property: "opacity"
+                        to: 0
+                        duration: 600
+                    }
+                    NumberAnimation{
+                        target: cursor
+                        property: "opacity"
+                        to: 1
+                        duration: 400
+                    }
                 }
             }
+            ScrollBar.vertical: ScrollBar{
+                parent: view
+                anchors.top: parent.top
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+            }
         }
+
+        /*ListView的横坐标绑定到此*/
         ScrollBar {
             id: hbar
             hoverEnabled: true
@@ -244,41 +322,6 @@ ApplicationWindow {
             ]
         }
     }
-
-    /*TESTING WARNING*/
-    ListModel{
-        id:textModel_E
-        ListElement {
-            rowItems: [
-                ListElement { description: "F" },
-                ListElement { description: "D" },
-                ListElement { description: "S" },
-                ListElement { description: "哈" },
-                ListElement { description: "哦" }
-            ]
-        }
-        ListElement {
-            rowItems: [
-                ListElement { description: "A" }
-            ]
-        }
-        ListElement {
-            rowItems: [
-                ListElement { description: "f" },
-                ListElement { description: "g" }
-            ]
-        }
-        ListElement {
-            rowItems: [
-                ListElement { description: "F" },
-                ListElement { description: "D" },
-                ListElement { description: "S" },
-                ListElement { description: "哈" },
-                ListElement { description: "哦" }
-            ]
-        }
-    }
-
 
 //        /*Passage Render*/
 //        ListView{
