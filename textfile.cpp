@@ -101,18 +101,21 @@ bool TextFile::canClose()
             return save();
         else if (pressed = QMessageBox::Cancel)
             return false;
-        return true;
+        return true;     //refuse to save (Discard)
     } else {
         return true;
     }
 }
 
 
-void TextFile::search(QString format)
+void TextFile::search(QString format, Qt::CaseSensitivity cs)
 {
-    //SearchVisitor searchVisitor;
-    //text->traverse(searchVisitor);
-
+    SearchVisitor searchVisitor(format,cs);
+    text->traverse(searchVisitor);
+    std::vector<std::pair<int,int>> result = searchVisitor.getResult();
+    for(auto e: result) {
+        highlight(e.first, e.second, format.size());
+    }
 }
 
 void TextFile::replace(QString format, QString newString)

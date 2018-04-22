@@ -30,6 +30,9 @@ void Application::saveAs()
 
 bool Application::close()
 {
+    if(!current->canClose())
+        return false;
+    openFiles.erase(current);
     return true;
 }
 
