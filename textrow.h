@@ -14,7 +14,7 @@ public:
     //this constructor may be called when a file is being loaded
     TextRow(QString text);
 
-    QChar& operator[](int position);//seems useless
+    QChar& operator[](int position);
 
     //int size();
     //int capacity();//only for debug

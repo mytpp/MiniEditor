@@ -6,6 +6,12 @@ TextStructure::TextStructure()
 {
 }
 
+const QString TextStructure::data(std::pair<int, int> begin, std::pair<int, int> end) const
+{
+    QString result;
+    return result;
+}
+
 bool TextStructure::insert(std::pair<int, int> position, QChar character)
 {
     return true;

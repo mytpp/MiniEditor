@@ -14,7 +14,7 @@ public:
     Application();
 
     //triggered by 'open' button
-    Q_INVOKABLE bool addFile(QUrl address = QUrl());
+    Q_INVOKABLE void addFile(QUrl address = QUrl());
 
     //the three function is for currentFile
     //when save(As)?() is called, remeber to ask for URL when necessary
@@ -25,12 +25,16 @@ public:
     Q_INVOKABLE bool close();
 
     //close all files, triggered by 'quit' button
-    Q_INVOKABLE void closeAll();
+    //or 'X' on righttop of the window (signal: ApplicationWindow's closing())
+    //whether the application is really to be closed depends on the function's return value
+    Q_INVOKABLE bool closeAll();
+
     Q_INVOKABLE void saveAll();
 
 
     //maintain a reference in QML for currentFile, in case of calling this function too frenquently
     Q_INVOKABLE QObject* currentFile();
+    Q_INVOKABLE void setCurrentFile(int index);
 
 
     //debug

@@ -15,7 +15,7 @@ bool SearchVisitor::visit(QChar element)
     return false;
 }
 
- std::vector<std::pair<int,int>> SearchVisitor::getResult()
+ const std::vector<std::pair<int,int>>& SearchVisitor::getResult() const
 {
     return result;
 }

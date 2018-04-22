@@ -17,7 +17,9 @@ public:
     //let traverse() take the responsibility to get the position of the matched string
     virtual bool visit(QChar element) override;
 
-    std::vector<std::pair<int,int>> getResult();
+    //ReplaceCommand may use this
+    const QString& getFormat() const;
+    const std::vector<std::pair<int,int>>& getResult() const;
 
 private:
     //decide if a is equal to b accroding to 'cs'

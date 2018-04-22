@@ -16,7 +16,10 @@ public:
     //check if 'row' is a legal position, and let TextRow check if 'column' is legal,
     //and send some message if the position is out of range
 
-    QChar data(std::pair<int,int> position);//seems useless
+    QChar& data(std::pair<int,int> position);  //seems useless
+    //copy or cut may use this
+    //return a string from begin to end (including '\n')
+    const QString data(std::pair<int, int> begin, std::pair<int, int> end) const;
 
     //line-breaking character can be handled by these functions.
     //insert some content before the position point.

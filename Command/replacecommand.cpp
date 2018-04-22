@@ -2,7 +2,7 @@
 #include "Visitor/searchvisitor.h"
 #include "textfile.h"
 
-ReplaceCommand::ReplaceCommand(std::shared_ptr<SearchVisitor> RepVtr, QString fmt, QString str,
+ReplaceCommand::ReplaceCommand(std::shared_ptr<SearchVisitor> RepVtr, QString str,
                                std::shared_ptr<TextStructure> rec, TextFile *inv)
 {
 

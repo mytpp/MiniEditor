@@ -7,6 +7,12 @@ InsertCommand::InsertCommand(std::pair<int,int> pos, QChar cha,
     token=CHA;
 }
 
+InsertCommand::InsertCommand(std::pair<int, int> pos, QString newString,
+                             std::shared_ptr<TextStructure> rec, TextFile *inv)
+{
+    token=STR;
+}
+
 void InsertCommand::operator ()()
 {
 
