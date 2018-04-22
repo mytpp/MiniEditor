@@ -39,6 +39,7 @@ public:
 private:
     //support multi-file edition
     std::list<TextFile> openFiles;
+    std::list<TextFile>::iterator current;
 };
 
 #endif // APPLICATION_H
