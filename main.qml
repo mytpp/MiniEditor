@@ -199,7 +199,7 @@ ApplicationWindow {
                         }
                     }
                 }
-            }
+
         }
 
         ListView{
@@ -317,7 +317,7 @@ ApplicationWindow {
         }
         ListElement {
             attributes: [
-                ListElement { description: "f" },
+                ListElement { description: "sss" },
                 ListElement { description: "g" }
             ]
         }

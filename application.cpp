@@ -28,8 +28,9 @@ void Application::saveAs()
 
 }
 
-void Application::close()
+bool Application::close()
 {
+    return true;
 }
 
 void Application::closeAll()

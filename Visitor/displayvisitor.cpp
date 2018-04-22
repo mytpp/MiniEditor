@@ -1,7 +1,7 @@
 #include "displayvisitor.h"
-#include "textfile.h"
 
-DisplayVisitor::DisplayVisitor()
+DisplayVisitor::DisplayVisitor(TextFile *src)
+    : background(src)
 {
 
 }

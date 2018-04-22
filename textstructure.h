@@ -3,8 +3,8 @@
 
 #include <list>
 #include <utility>
+#include "textrow.h"
 
-class TextRow;
 class AbstractVisitor;
 
 class TextStructure

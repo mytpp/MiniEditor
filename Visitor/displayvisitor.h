@@ -9,7 +9,7 @@ class TextFile;
 class DisplayVisitor: public AbstractVisitor
 {
 public:
-    DisplayVisitor();
+    DisplayVisitor(TextFile *src);
 
     //line-breaking character needs treating particularly
     virtual bool visit(QChar element) override;
