@@ -126,6 +126,14 @@ ApplicationWindow {
                 }
                 ToolSeparator {}
             }
+            Text{
+                text:"_sp:" + columnView._sp
+                color: "red"
+            }
+            Text{
+                text:"_ep:" + columnView._ep
+                color: "green"
+            }
         }
     }
 
@@ -146,30 +154,6 @@ ApplicationWindow {
 
         property int fontPixelSize: 16//font size
 
-
-//        ListView{
-//            model: textModel
-//            delegate: Row{
-//                Repeater{
-//                    model: attributes
-//                    delegate: Text {
-//                        property bool isSelected: false
-//                        z:2
-//                        text: description
-//                        Rectangle{
-//                            z:-1 //bellow the text
-//                            anchors.fill: parent
-//                            color: parent.isSelected ? "#66a9c9" : "white"
-//                        }
-//                        MouseArea{
-//                            anchors.fill: parent
-//                            onClicked: console.log(index);//index in line
-//                        }
-//                    }
-//                }
-//            }
-//        }
-
         /*定义每行的结构*/
         //TODO:Animation
         Component{
@@ -178,6 +162,11 @@ ApplicationWindow {
                 id:rowRec
                 height: view.fontPixelSize
                 width: rowView.width
+
+                property int _index: index
+
+                property bool isSelected: (index >= columnView._sp.y && index <= columnView._ep.y) ? true : false
+
                 ListView{
                     id:rowView
                     model: attributes
@@ -185,13 +174,13 @@ ApplicationWindow {
                     width: childrenRect.width
                     orientation:ListView.Horizontal
                     delegate:Text {
-                        property bool isSelected: false
+                        property bool isSelected: (rowRec.isSelected
+                                                   && index >= ((rowRec._index === columnView._sp.y) ? columnView._sp.x : 0)
+                                                   && index < ((rowRec._index === columnView._ep.y) ? columnView._ep.x : rowView.count)) ?
+                                                      true : false
                         property bool isHighlight: false
                         text: description
                         font.pixelSize: view.fontPixelSize
-                        MouseArea{
-                            anchors.fill: parent
-                        }
                         Rectangle{
                             z:-1 //below text
                             anchors.fill: parent
@@ -199,12 +188,13 @@ ApplicationWindow {
                         }
                     }
                 }
-
+            }
         }
 
         ListView{
             id:columnView
             x:-hbar.position*width
+            y:-vbar.position*height
             interactive: false//disable drag
             width: contentItem.childrenRect.width
             height: parent.height
@@ -215,39 +205,94 @@ ApplicationWindow {
             property point selectStart: Qt.point(0, 0);
             property point selectEnd: Qt.point(0, 0);
 
+            /*using complex logic to pickup the real start point and end point*/
+            property point _sp: (columnView.selectStart.y > columnView.selectEnd.y ||
+                                     (columnView.selectStart.x > columnView.selectEnd.x &&
+                                      columnView.selectStart.y === columnView.selectEnd.y)) ?
+                                    columnView.selectEnd : columnView.selectStart
+
+            property point _ep: (columnView.selectStart.y > columnView.selectEnd.y ||
+                                 (columnView.selectStart.x > columnView.selectEnd.x &&
+                                  columnView.selectStart.y === columnView.selectEnd.y)) ?
+                                    columnView.selectStart : columnView.selectEnd
+
+            /*change the state of items, mostly color
+             *@params: {Qt.point} startPoint point to start drawing color
+             *@params: {Qt.point} endPoint point to end drawing color
+             *@params: {string} mode "clear" or "highlight" or maybe more
+             */
+            function drawSelectedRange(startPoint, endPoint, mode){
+                var _sp, _ep;
+                if(startPoint.x > endPoint.x || startPoint.y > endPoint.y){
+                    _sp = endPoint;
+                    _ep = startPoint;
+                }
+                else{
+                    _sp = startPoint;
+                    _ep = endPoint;
+                }
+                for(var i = _sp.y; i <= _ep.y; i++){
+                    var rowTargetItem = columnView.contentItem.children[i];//row rectangle
+                    var length = rowTargetItem.children[0].count;//number of row items
+                    console.log(length);
+                    for(var j = (i === _sp.y ? _sp.x : 0); j <= (i === _ep.y ? _ep.x : length - 1); j++){
+                        var targetItem = rowTargetItem.children[0].contentItem.children[j];
+                        /*rowTargetItem.children[0] is the rectangle.*/
+                        console.log(targetItem.text);
+
+                        targetItem.isSelected = true;
+                    }
+                }
+            }
+
             MouseArea{
                 anchors.fill: parent
                 onClicked: {
                     var targetRow = columnView.itemAt(mouseX, mouseY);
-                    var targetItem = targetRow.children[0].itemAt(mouseX, 0)
-                    console.log(targetItem.text)
-                    var element = {
-                        attributes:[]
-                    };
-                    for(var t = 0; t < Math.random() * 10; t++){
-                        element.attributes.push({description:"n"})
-                    }
-                    textModel.append(element);
+                    var targetItem = targetRow.children[0].itemAt(mouseX, 0);
+//                    var element = {
+//                        attributes:[]
+//                    };
+//                    for(var t = 0; t < Math.random() * 10; t++){
+//                        element.attributes.push({description:"n"})
+//                    }
+//                    textModel.append(element);
 
                     cursor.x = targetItem.x;
                     cursor.y = targetRow.y;
                 }
-                onPressed: {
-                    parent.isSelecting = true;
-                }
                 onPositionChanged: {
-                    if(parent.isSelecting){
-                        var rowIndex = columnView.indexAt(mouseX, mouseY);
-                        var columnIndex = rowIndex !== -1 ? columnView.itemAt(mouseX, mouseY).children[0].indexAt(mouseX, 0) : -1;
-                        if(rowIndex >= 0 && columnIndex >= 0){
-                            console.log(rowIndex + ",", columnIndex);
+                    /*since the hoverEnable is false, will only matter when pressed down*/
+                    var rowIndex = columnView.indexAt(mouseX, mouseY);//y-axis
+                    var columnIndex = rowIndex !== -1 ? columnView.itemAt(mouseX, mouseY).children[0].indexAt(mouseX, 0) : -1;//x-axis
+                    if(rowIndex >= 0 && columnIndex >= 0){
+                        var _end = Qt.point(parent.selectEnd.x, parent.selectEnd.y)
+                        parent.selectEnd.y = columnView.indexAt(mouseX, mouseY);
+                        parent.selectEnd.x = columnView.itemAt(mouseX, mouseY).children[0].indexAt(mouseX, 0)
+                        if(!parent.isSelecting){//init selected range
+                            parent.selectStart.y = parent.selectEnd.y
+                            parent.selectStart.x = parent.selectEnd.x
+                            parent.isSelecting = true;
                         }
                     }
                 }
                 onReleased: {
+                    if(!parent.isSelecting){
+                        var rowIndex = columnView.indexAt(mouseX, mouseY);//y-axis
+                        var columnIndex = rowIndex !== -1 ? columnView.itemAt(mouseX, mouseY).children[0].indexAt(mouseX, 0) : -1;//x-axis
+                        if(rowIndex >= 0 && columnIndex >= 0){
+                            var _end = Qt.point(parent.selectEnd.x, parent.selectEnd.y)
+                            parent.selectEnd.y = columnView.indexAt(mouseX, mouseY);
+                            parent.selectEnd.x = columnView.itemAt(mouseX, mouseY).children[0].indexAt(mouseX, 0)
+                            if(!parent.isSelecting){//init selected range
+                                parent.selectStart.y = parent.selectEnd.y
+                                parent.selectStart.x = parent.selectEnd.x
+                                //parent.isSelecting = true;
+                            }
+                        }
+                    }
                     parent.isSelecting = false;
                 }
-
             }
 
             Rectangle{
@@ -275,12 +320,6 @@ ApplicationWindow {
                     }
                 }
             }
-            ScrollBar.vertical: ScrollBar{
-                parent: view
-                anchors.top: parent.top
-                anchors.right: parent.right
-                anchors.bottom: parent.bottom
-            }
         }
 
         /*ListView的横坐标绑定到此*/
@@ -291,6 +330,18 @@ ApplicationWindow {
             orientation: Qt.Horizontal
             size: view.width / columnView.contentItem.childrenRect.width
             anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+        }
+
+        /*ListView的纵坐标绑定到此*/
+        ScrollBar {
+            id: vbar
+            hoverEnabled: true
+            active: hovered || pressed
+            orientation: Qt.Vertical
+            size: view.height / columnView.contentHeight
+            anchors.top: parent.top
             anchors.right: parent.right
             anchors.bottom: parent.bottom
         }
@@ -307,95 +358,36 @@ ApplicationWindow {
                 ListElement { description: "D" },
                 ListElement { description: "S" },
                 ListElement { description: "哈" },
-                ListElement { description: "哦" }
+                ListElement { description: "哦" },
+                ListElement { description: "哈" },
+                ListElement { description: "哦" },
+                ListElement { description: "哈" },
+                ListElement { description: "哦" },
+                ListElement { description: "哈" },
+                ListElement { description: "哦" },
+                ListElement { description: "哈" },
+                ListElement { description: "哦" },
+                ListElement { description: "哈" },
+                ListElement { description: "哦" },
+                ListElement { description: " "}
             ]
         }
         ListElement {
             attributes: [
-                ListElement { description: "A" }
+                ListElement { description: "A" },
+                ListElement { description: "哈" },
+                ListElement { description: "哦" },
+                ListElement { description: "哈" },
+                ListElement { description: " " }
             ]
         }
         ListElement {
             attributes: [
-                ListElement { description: "sss" },
-                ListElement { description: "g" }
+                ListElement { description: "s" },
+                ListElement { description: "g" },
+                ListElement { description: " " }
             ]
         }
     }
-
-//        /*Passage Render*/
-//        ListView{
-//            model: textModel
-//            //define how to display a line
-//            delegate: ItemDelegate{
-//                height: 16
-//                Row{
-//                    Repeater{
-//                        model: attributes
-//                        Text{
-//                            text: description
-//                            MouseArea{
-//                                anchors.fill: parent
-//                                onClicked: console.log(view.height)
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        }
-
-//        Rectangle {
-//            width: 200; height: 400
-
-//            Component {
-//                id: textDelegate
-//                Item {
-//                    id: row
-//                    property int ind: index
-//                    width: 200; height: 20
-//                    Row {
-//                        spacing: 0
-//                        Repeater {
-//                            model: attributes
-
-//                            Text {
-//                                id: cha
-//                                text: description
-//                                MouseArea {
-//                                    anchors.fill: parent
-//                                    onClicked: {
-//                                        console.log(row.ind +"  "+model.index);
-//                                        cursor.x = cha.x;
-//                                        cursor.y = row.y;
-//                                    }
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-
-//            ListView {
-//                anchors.fill: parent
-//                model: textModel
-//                delegate: textDelegate
-//            }
-
-//            Rectangle {
-//                id: cursor
-//                height: 20//row.height
-//                width: 3
-//                color: "black"
-//                OpacityAnimator {
-//                    target: cursor
-//                    from: 1
-//                    to: 0
-//                    duration: 3000
-//                    loops: Animator.Infinite
-//                    running: true
-//                }
-//            }
-//        }
-
 }
-}
+
