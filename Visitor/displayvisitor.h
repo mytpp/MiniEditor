@@ -12,7 +12,7 @@ public:
     DisplayVisitor(TextFile *src);
 
     //line-breaking character needs treating particularly
-    virtual bool visit(QChar element) override;
+    virtual bool visit(QChar& element) override;
 
 private:
     //use this to emit insertCha() or newLine() signal

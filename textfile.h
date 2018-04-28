@@ -57,13 +57,17 @@ signals:
     void testSlot(int event);
 
     void loaded();  //emitted in constructors
-    /*signal destroyed is provided by QObject*/
+    /*signal destroyed() is provided by QObject*/
 
+    //cha and str may contain '\n', which need special handling in QML
     void insertCha(int row, int column, QChar cha);
-    //void insertStr(int row, int column, QString str);  //seems useless
-    void newLine(int row, int column);  //break line at the specified position
+    void insertStr(int row, int column, QString str);
+    void append(QChar cha); //for loading file (DisplayVisitor)
 
-    void eraseStr(int row, int column, int length = 1);
+    void eraseCha(int row, int column);
+    //erase content between {rowBegin, colBegin}(included) and {rowEnd, colEnd}(excluded)
+    //which may contain '\n'
+    void eraseStr(int rowBegin, int colBegin, int rowEnd, int colEnd);
     void eraseLine(int row);//'row' should be greater than 0, the first row is never to be erased
                             //merge line 'row' with the previous line or erase an empty line
 

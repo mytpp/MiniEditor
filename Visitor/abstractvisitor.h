@@ -9,7 +9,7 @@ public:
     AbstractVisitor();
     virtual ~AbstractVisitor();
 
-    virtual bool visit(QChar element) = 0;
+    virtual bool visit(QChar& element) = 0;
 
 };
 

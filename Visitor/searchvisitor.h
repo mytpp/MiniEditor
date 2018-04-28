@@ -15,7 +15,7 @@ public:
 
     //return true if matched string if found for the first time
     //let traverse() take the responsibility to get the position of the matched string
-    virtual bool visit(QChar element) override;
+    virtual bool visit(QChar& element) override;
 
     //ReplaceCommand may use this
     const QString& getFormat() const;

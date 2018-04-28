@@ -1,4 +1,5 @@
 #include "displayvisitor.h"
+#include "textfile.h"
 
 DisplayVisitor::DisplayVisitor(TextFile *src)
     : background(src)
@@ -6,8 +7,9 @@ DisplayVisitor::DisplayVisitor(TextFile *src)
 
 }
 
-bool DisplayVisitor::visit(QChar element)
+bool DisplayVisitor::visit(QChar& element)
 {
-    return false;
+    background->append(element); //emit signal
+    return true;
 }
 

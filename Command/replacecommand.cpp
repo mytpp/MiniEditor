@@ -4,6 +4,7 @@
 
 ReplaceCommand::ReplaceCommand(std::shared_ptr<SearchVisitor> RepVtr, QString str,
                                std::shared_ptr<TextStructure> rec, TextFile *inv)
+    :visitor(RepVtr), newString(str), invoker(inv), receiver(rec)
 {
 
 }

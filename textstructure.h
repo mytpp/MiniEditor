@@ -31,13 +31,15 @@ public:
 
 
     bool erase(std::pair<int,int> position);
+    //erase content between [begin, end)
     bool erase(std::pair<int,int> begin, std::pair<int,int> end);
 
     //inner iterator
     bool traverse(AbstractVisitor &visitor);
 
 private:
-    //each line begin with a '\n' indicating this line exists
+    //each line end with a '\n'
+    //a empty line contain only a '\n'
     std::list<TextRow> text;
 };
 

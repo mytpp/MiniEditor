@@ -86,10 +86,11 @@ bool TextFile::saveAs()
 
 bool TextFile::saveFile(QUrl path)
 {
-    file.open(url.url().toLocal8Bit().data());
+    file.open(path.url().toLocal8Bit().data());
     if (file) {
         SaveVisitor save(file);
         bool success = text->traverse(save);
+        file.close();
         if (success)
             url = path;
         return success;

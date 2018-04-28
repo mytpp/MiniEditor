@@ -11,7 +11,7 @@ public:
     SaveVisitor(std::fstream &dest);
 
     //line-breaking character needs treating particularly
-    virtual bool visit(QChar element) override;
+    virtual bool visit(QChar& element) override;
 
 private:
     std::fstream &to;

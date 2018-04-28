@@ -10,7 +10,7 @@ SearchVisitor::~SearchVisitor()
     delete [] next;
 }
 
-bool SearchVisitor::visit(QChar element)
+bool SearchVisitor::visit(QChar& element)
 {
     return false;
 }

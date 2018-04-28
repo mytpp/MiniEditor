@@ -8,7 +8,6 @@ class AbstractVisitor;
 
 class TextRow
 {
-    //friend class TextStructure;
 public:
     TextRow();
     //this constructor may be called when a file is being loaded
