@@ -15,6 +15,11 @@ bool SearchVisitor::visit(QChar& element)
     return false;
 }
 
+const QString& SearchVisitor::getFormat() const
+{
+    return target;
+}
+
  const std::vector<std::pair<int,int>>& SearchVisitor::getResult() const
 {
     return result;
