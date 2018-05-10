@@ -16,6 +16,8 @@ void Application::addFile(QUrl address)
         openFiles.push_back(TextFile());
     else
         openFiles.push_back(TextFile(address));
+    emit fileLoaded(openFiles.back().fileName());
+    setCurrentFile(--openFiles.end()); //call display()
 }
 
 QObject* Application::currentFile()
@@ -25,8 +27,15 @@ QObject* Application::currentFile()
 
 void Application::setCurrentFile(int index)
 {
-    current = openFiles.begin();
-    advance(current, index);//complexity O(n)
+    auto i = openFiles.begin();
+    advance(i, index);//complexity O(n)
+    setCurrentFile(i);
+}
+
+void Application::setCurrentFile(std::list<TextFile>::iterator index)
+{
+    current = index;
+    emit fileLoaded(current->fileName());
     current->display();
 }
 
@@ -43,9 +52,15 @@ void Application::saveAs()
 bool Application::close()
 {
     if(!current->canClose())
-        return false;
-    openFiles.erase(current);//QObject emit destroyed signal, which is to be handled by QML
-    return true;
+        return false;  //useless
+    auto i = openFiles.erase(current);//QObject emit destroyed signal, which is to be handled by QML
+    if(!openFiles.empty()) {
+        if(i == openFiles.end())
+            setCurrentFile(--i);
+        else
+            setCurrentFile(i);
+    }
+    return true;       //useless
 }
 
 bool Application::closeAll()

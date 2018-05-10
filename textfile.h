@@ -29,6 +29,8 @@ public:
     bool saveAs();
     bool canClose();
 
+    const QString fileName() const;
+
     Q_INVOKABLE void cut(int rowBegin, int colBegin, int rowEnd, int colEnd);//use EraseCommand inside
     Q_INVOKABLE void copy(int rowBegin, int colBegin, int rowEnd, int colEnd);
     Q_INVOKABLE void paste(int row, int column);                             //use InsertCommand inside
@@ -56,7 +58,6 @@ public:
 signals:
     void testSlot(int event);
 
-    void loaded();  //emitted in constructors
     /*signal destroyed() is provided by QObject*/
 
     //cha and str may contain '\n', which need special handling in QML
@@ -81,6 +82,7 @@ private:
 private:
     bool isModified; //check if the file needs saving when closing it
     QUrl url;        //url==QUrl() if the flie has been stored in hard drive
+    QString name;
     std::shared_ptr<TextStructure> text;
     std::fstream file;
     std::list<std::shared_ptr<EditCommand>> historyList;

@@ -13,6 +13,7 @@ private|QUrl | url;
 private|std::shared_ptr\<TextStructure> | text;
 private|std::fstream | file;
 private|std::list\<EditCommand*> | historyList;
+private|std::list\<std::shared_ptr\<EditCommand>>::iterator | nextCommand;
 
 ## Public Functions
 | 类型 |声明|
@@ -20,18 +21,38 @@ private|std::list\<EditCommand*> | historyList;
 | |TextFile()
 | |TextFile(const TextFile &)
 | |TextFile(QUrl address)
-Q_INVOKABLE void | saveFile(QUrl address);
-Q_INVOKABLE void | close();
+void | display()
+bool | save()
+bool | saveAs()
+bool | canClose()
 Q_INVOKABLE void | cut(int rowBegin, int colBegin, int rowEnd, int colEnd)
 Q_INVOKABLE void | copy(int rowBegin, int colBegin, int rowEnd, int colEnd)
-Q_INVOKABLE void | paste(int row, int column, QString newString)
-Q_INVOKABLE void | search(QString format)
-Q_INVOKABLE void | replace(QString format, QString newString)
+Q_INVOKABLE void | paste(int row, int column)
+Q_INVOKABLE void | search(QString format, Qt::CaseSensitivity = Qt::CaseSensitive);
+Q_INVOKABLE void | replace(QString format, QString newString, Qt::CaseSensitivity = Qt::CaseSensitive)
 Q_INVOKABLE void | insert(int row, int column, QChar character)
+Q_INVOKABLE void | insert(int row, int column, QString newString)
+Q_INVOKABLE void | erase(int row, int column)
 Q_INVOKABLE void | erase(int rowBegin, int colBegin, int rowEnd, int colEnd)
 Q_INVOKABLE void | undo()
 Q_INVOKABLE void | redo()
-Q_INVOKABLE void | test()
+
+## Private Functions
+| 类型 |声明|
+|-|-|
+bool | saveFile(QUrl path)
+void | addCommand(std::shared_ptr<EditCommand> command)
+
+## Signals
+* loaded()
+* insertCha(int row, int column, QChar cha)
+* insertStr(int row, int column, QString str)
+* append(QChar cha)
+* eraseCha(int row, int column)
+* eraseStr(int rowBegin, int colBegin, int rowEnd, int colEnd)
+* eraseLine(int row)
+* highlight(int row, int column, int length = 1)
+
 
 ## Property Documentation
 

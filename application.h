@@ -40,6 +40,12 @@ public:
     //debug
     Q_INVOKABLE QChar addChar();
 
+signals:
+    void fileLoaded(QString name);
+
+private:
+    void setCurrentFile(std::list<TextFile>::iterator index);
+
 private:
     //support multi-file edition
     std::list<TextFile> openFiles;

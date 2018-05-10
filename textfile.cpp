@@ -17,13 +17,13 @@
 TextFile::TextFile()
     : isModified(false),
       url(),
+      name("Untitled"),
       text(new TextStructure),
       file(),
       historyList(),
       nextCommand(historyList.end())
 {
     text->insert({0,0}, QChar('\n'));
-    emit loaded();
     qDebug()<<"Empty TextFile Construted";
     //qDebug()<<QUrl("file:file.txt").url();
 }
@@ -31,6 +31,7 @@ TextFile::TextFile()
 TextFile::TextFile(QUrl address)
     : isModified(false),
       url(address),
+      name(url.fileName()),
       text(new TextStructure),
       file(address.url().toLocal8Bit().data()),
       historyList(),
@@ -45,9 +46,7 @@ TextFile::TextFile(QUrl address)
             text->insert({i,0}, QChar('\n'));
             text->insert({i,1}, line_16bit);
         }
-        display();
         file.close();
-        emit loaded();
     } else {
         QMessageBox::warning(nullptr, tr("Warning!"), tr("Couldn't open file:")+address.url(), QMessageBox::Ok);
     }
@@ -115,6 +114,11 @@ bool TextFile::canClose()
     } else {
         return true;
     }
+}
+
+const QString TextFile::fileName() const
+{
+    return name;
 }
 
 void TextFile::addCommand(std::shared_ptr<EditCommand> command)
