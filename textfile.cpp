@@ -20,6 +20,8 @@ TextFile::TextFile()
       name("Untitled"),
       text(new TextStructure),
       file(),
+      searchVisitor(),
+      currentSearchResult(),
       historyList(),
       nextCommand(historyList.end())
 {
@@ -34,6 +36,8 @@ TextFile::TextFile(QUrl address)
       name(url.fileName()),
       text(new TextStructure),
       file(address.url().toLocal8Bit().data()),
+      searchVisitor(),
+      currentSearchResult(),
       historyList(),
       nextCommand(historyList.end())
 {
@@ -132,19 +136,31 @@ void TextFile::search(QString format, Qt::CaseSensitivity cs)
 {
     searchVisitor = std::make_shared<SearchVisitor>(format,cs);
     text->traverse(*searchVisitor);
-    const std::vector<std::pair<int,int>> result = searchVisitor->getResult();
+    const std::vector<std::pair<int,int>>& result = searchVisitor->getResult();
     for(auto e: result) {
         emit highlight(e.first, e.second, format.size());
     }
-    next = result.cbegin();
+    currentSearchResult = result.cbegin();
+}
+
+void TextFile::showPrevious()
+{
+    if(currentSearchResult == searchVisitor->getResult().cbegin())
+        currentSearchResult = searchVisitor->getResult().cend();
+    --currentSearchResult;
+    emit highlightNext(currentSearchResult->first,
+                       currentSearchResult->second,
+                       searchVisitor->getFormat().size());
 }
 
 void TextFile::showNext()
 {
-    if(next == searchVisitor->getResult().cend())
-        next = searchVisitor->getResult().cbegin();
-    emit highlightNext(next->first, next->second, searchVisitor->getFormat().size());
-    ++next;
+    if(currentSearchResult == searchVisitor->getResult().cend())
+        currentSearchResult = searchVisitor->getResult().cbegin();
+    emit highlightNext(currentSearchResult->first,
+                       currentSearchResult->second,
+                       searchVisitor->getFormat().size());
+    ++currentSearchResult;
 }
 
 void TextFile::replace(QString format, QString newString, Qt::CaseSensitivity cs)
