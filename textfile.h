@@ -6,10 +6,12 @@
 #include <QObject>
 #include <fstream>
 #include <memory>
-#include "Command/editcommand.h"
+#include <utility>
 #include <QDebug>
 
 class TextStructure;
+class EditCommand;
+class SearchVisitor;
 
 class TextFile: public QObject
 {
@@ -37,6 +39,7 @@ public:
 
     //emit highlight() signal in the two functions
     Q_INVOKABLE void search(QString format, Qt::CaseSensitivity = Qt::CaseSensitive);//use SearchVisitor inside
+    Q_INVOKABLE void showNext();
     //use a SearchVisitor to traverse 'text' and pass the visitor's reference to ReplaceCommand
     //the erase & insert signal are emitted inside EditCommand, while highlight() signal is emited ouside the visitor
     //because the former has a influence on undo(), the latter is just for UI
@@ -74,6 +77,7 @@ signals:
 
     void highlight(int row, int column, int length = 1);//for search result, maybe in yellow?
     //highlighting selected string (maybe in blue?) should be done just in QML, i.e. UI level.
+    void highlightNext(int row, int column, int length = 1);
 
 private:
     bool saveFile(QUrl path);
@@ -85,6 +89,8 @@ private:
     QString name;
     std::shared_ptr<TextStructure> text;
     std::fstream file;
+    std::shared_ptr<SearchVisitor> searchVisitor;
+    std::vector<std::pair<int,int>>::const_iterator next;
     std::list<std::shared_ptr<EditCommand>> historyList;
     std::list<std::shared_ptr<EditCommand>>::iterator nextCommand;
 };

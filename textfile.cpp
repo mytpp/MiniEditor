@@ -130,24 +130,29 @@ void TextFile::addCommand(std::shared_ptr<EditCommand> command)
 
 void TextFile::search(QString format, Qt::CaseSensitivity cs)
 {
-    SearchVisitor searchVisitor(format,cs);
-    text->traverse(searchVisitor);
-    std::vector<std::pair<int,int>> result = searchVisitor.getResult();
+    searchVisitor = std::make_shared<SearchVisitor>(format,cs);
+    text->traverse(*searchVisitor);
+    const std::vector<std::pair<int,int>> result = searchVisitor->getResult();
     for(auto e: result) {
         emit highlight(e.first, e.second, format.size());
     }
+    next = result.cbegin();
+}
+
+void TextFile::showNext()
+{
+    if(next == searchVisitor->getResult().cend())
+        next = searchVisitor->getResult().cbegin();
+    emit highlightNext(next->first, next->second, searchVisitor->getFormat().size());
+    ++next;
 }
 
 void TextFile::replace(QString format, QString newString, Qt::CaseSensitivity cs)
 {
-    std::shared_ptr<SearchVisitor> searchVisitor(new SearchVisitor(format,cs));
-    text->traverse(*searchVisitor);
-    std::vector<std::pair<int,int>> result = searchVisitor->getResult();
-    for(auto e: result) {
-        highlight(e.first, e.second, format.size());
-    }
+    search(format, cs);
+    std::shared_ptr<SearchVisitor> searchInfo(new SearchVisitor(*searchVisitor));//synthesized copy constructor will work
     std::shared_ptr<ReplaceCommand> replaceCommand(
-                new ReplaceCommand(searchVisitor, newString, text, this));
+                new ReplaceCommand(searchInfo, newString, text, this));
     (*replaceCommand)();
    addCommand(replaceCommand);
 }
