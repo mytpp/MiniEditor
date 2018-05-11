@@ -31,11 +31,15 @@ ApplicationWindow {
         ListModel{
             id:openFiles
             ListElement{
-                name:' 社会主义从空想到科学的发展'
+                name:'社会主义从空想到科学的发展'
+            }
+            ListElement{
+                name:'概率论与数理统计'
             }
         }
 
         ListView{
+            id:openFileTabs
             anchors.bottom: parent.bottom
             anchors.left: parent.left
             anchors.leftMargin: 30
@@ -48,10 +52,16 @@ ApplicationWindow {
             orientation: ListView.Horizontal
 
             model: openFiles
+
+            highlight: Rectangle{
+                //anchors.fill: parent
+                color: 'white'
+            }
+
             delegate: Rectangle{
                 height: 40
                 width: 250
-                color: 'white'
+                color: 'transparent'
                 radius: 5
                 Column{
                     anchors.fill: parent
@@ -75,7 +85,15 @@ ApplicationWindow {
                         elide: Text.ElideRight
                     }
 
+                    MouseArea{
+                        anchors.fill: parent
+                        onClicked: {
+                            openFileTabs.currentIndex = index;
+                        }
+                    }
+
                     ToolButton{
+                        visible: openFileTabs.currentIndex == index
                         anchors.right: parent.right
                         anchors.rightMargin: 10
                         anchors.bottom: parent.bottom
@@ -83,9 +101,14 @@ ApplicationWindow {
 
                         width: 20
                         height: 20
+                        z:5
 
                         font.family: "FontAwesome"
                         text: "\uf00d"
+
+                        onClicked: {
+                            app.close();
+                        }
                     }
                 }
             }
@@ -123,14 +146,23 @@ ApplicationWindow {
                 ToolButton {//save
                     text: "\uf0c7"
                     font.family: "FontAwesome"
+                    onClicked: {
+                        app.save();
+                    }
                 }
                 ToolButton {//redo
                     text: "\uf01e"
                     font.family: "FontAwesome"
+                    onClicked: {
+                        app.currentFile().redo();
+                    }
                 }
                 ToolButton {//undo
                     text: "\uf0e2"
                     font.family: "FontAwesome"
+                    onClicked: {
+                        app.currentFile().undo();
+                    }
                 }
                 ToolSeparator {}
             }
@@ -182,7 +214,7 @@ ApplicationWindow {
             font.pixelSize: 20
 
             onEditingFinished: {
-                //TODO:Search()
+                app.currentFile().search(searchInput.text);
             }
         }
         Button{
@@ -539,6 +571,61 @@ ApplicationWindow {
                 ListElement { description: "g" },
                 ListElement { description: " " }
             ]
+        }
+    }
+
+    Connections{
+        target: app
+//        onLoaded:{
+//            //TODO:修改文件列表model
+//            currentFile.target = app.currentFile();
+//        }
+    }
+    Connections{
+        id:currentFile
+        target: null
+
+        /*----------修改Model操作----------*/
+        onInsertCha:{//插入字符
+            if(str[i] !== '\n'){
+                textModel.at(row).attributes.splice(column, 0, {description: cha});
+            }
+            else{
+                textModel.insert(row + 1, {attributes:[{description:' '}]});//插入末尾空字符
+                var preLine = textModel.at(row).attributes;
+                textModel.at(row + 1).attributes.splice(0, 0, preLine.splice(i, preLine.length - 1 - i));
+            }
+        }
+        onInsertStr:{//插入字符串
+            var _row = row;
+            var _column = column;
+            for(var i = 0; i < str.length; i++){
+                if(str[i] !== '\n'){
+                    textModel.at(_row).attributes.splice(_column, 0, {description: str[i]});
+                    _column++;
+                }
+                else{
+                    var element = {
+                        attributes:[]
+                    }
+                    element.attributes.push({description:' '});
+                    textModel.insert(_row + 1, element);
+                    _row++;
+                    _column = 0;
+                }
+            }
+        }
+        onEraseCha:{//删除字符
+            textModel.at(row).attributes.splice(column, 1);
+        }
+        onEraseLine:{//删除一行末尾的换行符
+            var nowLine = textModel.at(row).attributes;
+            var nextLine = textModel.at(row + 1).attibutes;
+            nowLine.splice(nowLine.length - 1, 0, nextLine.splice(0, nextLine.length - 1));
+            textModel.remove(row + 1);
+        }
+        onHightlight:{
+            columnView.drawHighlightRange(Qt.point(row, column), Qt.point(row, column + length - 1), 'hightlight');
         }
     }
 }
