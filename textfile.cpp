@@ -52,14 +52,22 @@ TextFile::TextFile(QUrl address)
         }
         file.close();
     } else {
-        QMessageBox::warning(nullptr, tr("Warning!"), tr("Couldn't open file:")+address.url(), QMessageBox::Ok);
+        QMessageBox::warning(nullptr, tr("Warning!"),
+                             tr("Couldn't open file:")+address.url(), QMessageBox::Ok);
     }
 }
 
-TextFile::TextFile(const TextFile & afile)
+TextFile::TextFile(const TextFile &afile)
+    :isModified(afile.isModified),
+      url(afile.url),
+      name(afile.name),
+      text(afile.text),
+      file(),
+      searchVisitor(),
+      currentSearchResult(),
+      historyList(),
+      nextCommand(historyList.end())
 {
-    isModified = afile.isModified;
-    url = afile.url;
     qDebug()<<"TextFile Copy Constructed";
 }
 
@@ -89,13 +97,15 @@ bool TextFile::saveAs()
 
 bool TextFile::saveFile(QUrl path)
 {
-    file.open(path.url().toLocal8Bit().data());
+    file.open(path.url().toLocal8Bit().data(), std::ios::out);
     if (file) {
         SaveVisitor save(file);
         bool success = text->traverse(save);
         file.close();
-        if (success)
+        if (success) {
             url = path;
+            name = url.fileName();
+        }
         return success;
     } else {
         QMessageBox::warning(nullptr, tr("Warning!"), tr("Couldn't find path:")+url.url(), QMessageBox::Ok);
@@ -129,48 +139,80 @@ void TextFile::addCommand(std::shared_ptr<EditCommand> command)
 {
     historyList.erase(nextCommand, historyList.end());
     historyList.push_back(command);
-    ++nextCommand;
+    nextCommand = historyList.end();
+    isModified = true;
 }
 
-void TextFile::search(QString format, Qt::CaseSensitivity cs)
+void TextFile::highlightAll(int length)
+{
+    std::vector<std::pair<int,int>>& result = searchVisitor->getResult();
+    for(const auto &e: result) {
+        emit highlight(e.first, e.second, length);
+    }
+}
+
+bool TextFile::search(QString format, Qt::CaseSensitivity cs)
 {
     searchVisitor = std::make_shared<SearchVisitor>(format,cs);
     text->traverse(*searchVisitor);
-    const std::vector<std::pair<int,int>>& result = searchVisitor->getResult();
-    for(auto e: result) {
-        emit highlight(e.first, e.second, format.size());
-    }
-    currentSearchResult = result.cbegin();
+    if(searchVisitor->noResult())
+        return false;
+    highlightAll(format.size());
+    currentSearchResult = searchVisitor->getResult().begin();
+    emit highlightCurrent(currentSearchResult->first, currentSearchResult->second, format.size());
+    return true;
 }
 
 void TextFile::showPrevious()
 {
+    if(searchVisitor->noResult())
+        return;
     if(currentSearchResult == searchVisitor->getResult().cbegin())
-        currentSearchResult = searchVisitor->getResult().cend();
+        currentSearchResult = searchVisitor->getResult().end();
     --currentSearchResult;
-    emit highlightNext(currentSearchResult->first,
+    emit highlightCurrent(currentSearchResult->first,
                        currentSearchResult->second,
                        searchVisitor->getFormat().size());
 }
 
 void TextFile::showNext()
 {
-    if(currentSearchResult == searchVisitor->getResult().cend())
-        currentSearchResult = searchVisitor->getResult().cbegin();
-    emit highlightNext(currentSearchResult->first,
+    if(searchVisitor->noResult())
+        return;
+    if(currentSearchResult == --searchVisitor->getResult().cend())
+        currentSearchResult = searchVisitor->getResult().begin();
+    else
+        ++currentSearchResult;
+    emit highlightCurrent(currentSearchResult->first,
                        currentSearchResult->second,
                        searchVisitor->getFormat().size());
-    ++currentSearchResult;
 }
 
-void TextFile::replace(QString format, QString newString, Qt::CaseSensitivity cs)
+void TextFile::replaceAll(QString newString)
 {
-    search(format, cs);
-    std::shared_ptr<SearchVisitor> searchInfo(new SearchVisitor(*searchVisitor));//synthesized copy constructor will work
+    //search(format, cs);   //hope user click "search" button manually
+    std::shared_ptr<SearchVisitor> searchInfo =
+            std::make_shared<SearchVisitor>(*searchVisitor);//synthesized copy constructor will work
     std::shared_ptr<ReplaceCommand> replaceCommand(
                 new ReplaceCommand(searchInfo, newString, text, this));
     (*replaceCommand)();
-   addCommand(replaceCommand);
+    addCommand(replaceCommand);
+    highlightAll(newString.size());
+    (searchVisitor->getResult()).clear();
+}
+
+void TextFile::replaceCurrent(QString newString)
+{
+    if(searchVisitor->noResult() || searchVisitor->getFormat() == newString)
+        return;
+    int row = currentSearchResult->first;
+    int column = currentSearchResult->second;
+    int length = (searchVisitor->getFormat()).size();
+    eraseStr(row, column, row, column+length);
+    insert(row, column, newString);
+    //erase the replaced item from search result
+    (searchVisitor->getResult()).erase(currentSearchResult);
+    emit highlightCurrent(row, column, newString.size());
 }
 
 void TextFile::cut(int rowBegin, int colBegin, int rowEnd, int colEnd)

@@ -20,8 +20,13 @@ const QString& SearchVisitor::getFormat() const
     return target;
 }
 
- const std::vector<std::pair<int,int>>& SearchVisitor::getResult() const
+std::vector<std::pair<int,int>>& SearchVisitor::getResult()
 {
     return result;
+}
+
+bool SearchVisitor::noResult()
+{
+    return result.empty();
 }
 

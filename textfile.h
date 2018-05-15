@@ -19,7 +19,7 @@ class TextFile: public QObject
 public:
     TextFile();                //unstored file
 
-    TextFile(const TextFile &);//requisite for QML loading
+    TextFile(const TextFile &);//requisite for std::list
 
     //construct the TextStructure according to the file been read
     //and display the file via QML
@@ -38,13 +38,15 @@ public:
     Q_INVOKABLE void paste(int row, int column);                             //use InsertCommand inside
 
     //emit highlight() signal in the two functions
-    Q_INVOKABLE void search(QString format, Qt::CaseSensitivity = Qt::CaseSensitive);//use SearchVisitor inside
+    //search() return false if no matched item is found
+    Q_INVOKABLE bool search(QString format, Qt::CaseSensitivity = Qt::CaseSensitive);//use SearchVisitor inside
     Q_INVOKABLE void showPrevious();
     Q_INVOKABLE void showNext();
     //use a SearchVisitor to traverse 'text' and pass the visitor's reference to ReplaceCommand
     //the erase & insert signal are emitted inside EditCommand, while highlight() signal is emited ouside the visitor
     //because the former has a influence on undo(), the latter is just for UI
-    Q_INVOKABLE void replace(QString format, QString newString, Qt::CaseSensitivity = Qt::CaseSensitive);//use ReplaceCommand & SearchVisitor inside
+    Q_INVOKABLE void replaceAll(QString newString);          //use ReplaceCommand & SearchVisitor inside
+    Q_INVOKABLE void replaceCurrent(QString newString);
 
     Q_INVOKABLE void insert(int row, int column, QChar character);           //use InsertCommand inside
     Q_INVOKABLE void insert(int row, int column, QString newString);         //use InsertCommand inside
@@ -78,11 +80,12 @@ signals:
 
     void highlight(int row, int column, int length = 1);//for search result, maybe in yellow?
     //highlighting selected string (maybe in blue?) should be done just in QML, i.e. UI level.
-    void highlightNext(int row, int column, int length = 1);//highlight in different color
+    void highlightCurrent(int row, int column, int length = 1);//highlight in different color
 
 private:
     bool saveFile(QUrl path);
     void addCommand(std::shared_ptr<EditCommand> command);
+    void highlightAll(int length = 1);
 
 private:
     bool isModified; //check if the file needs saving when closing it
@@ -91,7 +94,7 @@ private:
     std::shared_ptr<TextStructure> text;
     std::fstream file;
     std::shared_ptr<SearchVisitor> searchVisitor;
-    std::vector<std::pair<int,int>>::const_iterator currentSearchResult;
+    std::vector<std::pair<int,int>>::iterator currentSearchResult;
     std::list<std::shared_ptr<EditCommand>> historyList;
     std::list<std::shared_ptr<EditCommand>>::iterator nextCommand;
 };

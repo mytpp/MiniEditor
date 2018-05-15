@@ -19,7 +19,9 @@ public:
 
     //ReplaceCommand may use this
     const QString& getFormat() const;
-    const std::vector<std::pair<int,int>>& getResult() const;
+    std::vector<std::pair<int,int>>& getResult();
+
+    bool noResult();
 
 private:
     //decide if a is equal to b accroding to 'cs'

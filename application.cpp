@@ -7,7 +7,7 @@ Application::Application()
       current(openFiles.end())
 {
     //debug
-    openFiles.push_back(TextFile());
+    //openFiles.push_back(TextFile());
 }
 
 void Application::addFile(QUrl address)
@@ -79,7 +79,7 @@ bool Application::closeAll()
 
 void Application::saveAll()
 {
-    for(auto file: openFiles)
+    for(auto &file: openFiles)
         file.save();
 }
 
