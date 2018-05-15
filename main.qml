@@ -89,6 +89,7 @@ ApplicationWindow {
                         anchors.fill: parent
                         onClicked: {
                             openFileTabs.currentIndex = index;
+                            app.setCurrentFile(index);
                         }
                     }
 
@@ -371,6 +372,22 @@ ApplicationWindow {
                 }
             }
 
+            /*返回实际的起点、终点*/
+            function getTruthPoint(){
+                var _sp = (columnView.selectStart.y > columnView.selectEnd.y ||
+                           (columnView.selectStart.x > columnView.selectEnd.x &&
+                            columnView.selectStart.y === columnView.selectEnd.y)) ?
+                          columnView.selectEnd : columnView.selectStart;
+                var _ep = (columnView.selectStart.y > columnView.selectEnd.y ||
+                           (columnView.selectStart.x > columnView.selectEnd.x &&
+                            columnView.selectStart.y === columnView.selectEnd.y)) ?
+                          columnView.selectStart : columnView.selectEnd;
+                return {
+                    "_sp" : _sp,
+                    "_ep" : _ep
+                }
+            }
+
             MouseArea{
                 anchors.fill: parent
                 onClicked: {
@@ -384,7 +401,21 @@ ApplicationWindow {
 //                        element.attributes.push({description:"n"})
 //                    }
 //                    textModel.append(element);
+                    if ((mouse.button == Qt.LeftButton) && (mouse.modifiers & Qt.ShiftModifier)){
+                        //shift + leftClick设置选区
+                        var rowIndex = columnView.indexAt(mouseX, mouseY);//y-axis
+                        var columnIndex = rowIndex !== -1 ? columnView.itemAt(mouseX, mouseY).children[0].indexAt(mouseX, 0) : -1;//x-axis
+                        if(rowIndex >= 0 && columnIndex >= 0){
+                            //获取之前光标所在位置，设置为选区起点
+                            parent.selectStart.y = columnView.indexAt(cursor.x, cursor.y);
+                            parent.selectStart.x = columnView.itemAt(cursor.x, cursor.y).children[0].indexAt(cursor.x, 0);
+                            //设置选区终点为当前鼠标所在位置
+                            parent.selectEnd.y = columnView.indexAt(mouseX, mouseY);
+                            parent.selectEnd.x = columnView.itemAt(mouseX, mouseY).children[0].indexAt(mouseX, 0);
+                        }
+                    }
 
+                    //设置光标位置
                     cursor.x = targetItem.x;
                     cursor.y = targetRow.y;
                 }
@@ -395,7 +426,7 @@ ApplicationWindow {
                     if(rowIndex >= 0 && columnIndex >= 0){
                         var _end = Qt.point(parent.selectEnd.x, parent.selectEnd.y)
                         parent.selectEnd.y = columnView.indexAt(mouseX, mouseY);
-                        parent.selectEnd.x = columnView.itemAt(mouseX, mouseY).children[0].indexAt(mouseX, 0)
+                        parent.selectEnd.x = columnView.itemAt(mouseX, mouseY).children[0].indexAt(mouseX, 0);
                         if(!parent.isSelecting){//init selected range
                             parent.selectStart.y = parent.selectEnd.y
                             parent.selectStart.x = parent.selectEnd.x
@@ -496,10 +527,31 @@ ApplicationWindow {
         onTextEdited: {
             console.log(inputBus.text);
             //TODO:insert
+            var _sp = (columnView.selectStart.y > columnView.selectEnd.y ||
+                       (columnView.selectStart.x > columnView.selectEnd.x &&
+                        columnView.selectStart.y === columnView.selectEnd.y)) ?
+                      columnView.selectEnd : columnView.selectStart;
+
+            app.currentFile().insert(_sp.y, _sp.x, inputBus.text);
             inputBus.clear();
         }
 
         /*Handle shortcut event*/
+        Shortcut{//backspace
+            sequence: StandardKey.Backspace
+            onActivated: {
+                if(columnView.selectStart === columnView.selectEnd){
+                    app.currentFile().erase(columnView.selectEnd.y, columnView.selectEnd.x);
+                }
+                else{
+                    var _sp = columnView.getTruthPoint()["_sp"];
+                    var _ep = columnView.getTruthPoint()["_ep"];
+                    app.currentFile().erase(_sp.y, _sp.x, _ep.y, _ep.x);
+                    //TODO:删除的是终点序号之前or包括终点序号？（应该是之前）
+                }
+            }
+        }
+
         Shortcut{//search
             sequence: "Ctrl+F"
             onActivated: {
@@ -509,25 +561,28 @@ ApplicationWindow {
         Shortcut{//copy
             sequence: "Ctrl+C"
             onActivated: {
-                //TODO:copy()
+                var _sp = columnView.getTruthPoint()["_sp"];
+                var _ep = columnView.getTruthPoint()["_ep"];
+                app.currentFile().copy(_sp.y, _sp.x, _ep.y, _ep.x);
             }
         }
         Shortcut{//paste
             sequence: "Ctrl+V"
             onActivated: {
-                //TODO:paste()
+                var _ep = columnView.getTruthPoint()["_ep"];
+                app.currentFile().paste(_ep.y, _ep.x);
             }
         }
         Shortcut{//undo
             sequence: "Ctrl+Z"
             onActivated: {
-                //TODO:undo()
+                app.currentFile().undo();
             }
         }
         Shortcut{//save
             sequence: "Ctrl+S"
             onActivated: {
-                //TODO:save()
+                app.save();
             }
         }
     }
