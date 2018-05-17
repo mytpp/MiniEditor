@@ -182,7 +182,7 @@ ApplicationWindow {
     Rectangle{
         id:searchBar
         property bool _enable: false
-        width: 300
+        width: 400
         height: 40
         border.color: "grey"
         border.width: 1
@@ -204,33 +204,55 @@ ApplicationWindow {
             color: "#55000000"
         }
 
-        TextInput{
-            id:searchInput
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.left: parent.left
-            anchors.leftMargin: 5
-            height: 20
-            width: parent.width*0.9 - 5
-            clip: true
-            font.pixelSize: 20
+        Row{
+            spacing: 5
+            anchors.fill: parent
+            TextInput{
+                id:searchInput
+                anchors.verticalCenter: parent.verticalCenter
+                height: 20
+                width: 255
+                clip: true
+                font.pixelSize: 20
 
-            onEditingFinished: {
-                app.currentFile().search(searchInput.text);
+                onEditingFinished: {
+                    app.currentFile().search(searchInput.text);
+                }
             }
-        }
-        Button{
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.right: parent.right
-            anchors.rightMargin: 5
-            height: parent.height
-            width: parent.width*0.1 - 5
-            font.family: "FontAwesome"
-            text: "\uf00d"
+            Button{
+                anchors.verticalCenter: parent.verticalCenter
+                height: parent.height
+                width: 40
+                font.family: "FontAwesome"
+                text: "\uf060"
 
-            onClicked: {
-                searchBar._enable = false;
-                inputBus.focus = true;
-                searchInput.clear();
+                onClicked: {
+                    app.currentFile().showPrevious();
+                }
+            }
+            Button{
+                anchors.verticalCenter: parent.verticalCenter
+                height: parent.height
+                width: 40
+                font.family: "FontAwesome"
+                text: "\uf061"
+
+                onClicked: {
+                    app.currentFile().showNext();
+                }
+            }
+            Button{
+                anchors.verticalCenter: parent.verticalCenter
+                height: parent.height
+                width: 40
+                font.family: "FontAwesome"
+                text: "\uf00d"
+
+                onClicked: {
+                    searchBar._enable = false;
+                    inputBus.focus = true;
+                    searchInput.clear();
+                }
             }
         }
 
@@ -304,13 +326,13 @@ ApplicationWindow {
                                                    && index >= ((rowRec._index === columnView._sp.y) ? columnView._sp.x : 0)
                                                    && index < ((rowRec._index === columnView._ep.y) ? columnView._ep.x : rowView.count)) ?
                                                       true : false
-                        property bool isHighlight: false
+                        property string highlightMode: ""
                         text: description
                         font.pixelSize: view.fontPixelSize
                         Rectangle{
                             z:-1 //below text
                             anchors.fill: parent
-                            color: parent.isSelected ? "#5698c3" : (parent.isHighlight ? "#fed71a" : "white")
+                            color: parent.isSelected ? "#5698c3" : (parent.highlightMode == "na" ? "#fed71a" : (parent.highlightMode == "ac" ? "#5698c3" : "white"))
                         }
                     }
                 }
@@ -345,30 +367,28 @@ ApplicationWindow {
 
             /*change the state of items, set to high light
              *@params: {Qt.point} startPoint point to start drawing color
-             *@params: {Qt.point} endPoint point to end drawing color
+             *@params: {number} dl length of drawing
              *@params: {string} mode "clear" or "highlight" or maybe more
              */
-            function drawHighlightRange(startPoint, endPoint, mode){
-                var _sp, _ep;
-                if(startPoint.x > endPoint.x || startPoint.y > endPoint.y){
-                    _sp = endPoint;
-                    _ep = startPoint;
-                }
-                else{
-                    _sp = startPoint;
-                    _ep = endPoint;
-                }
-                for(var i = _sp.y; i <= _ep.y; i++){
-                    var rowTargetItem = columnView.contentItem.children[i];//row rectangle
-                    var length = rowTargetItem.children[0].count;//number of row items
-                    console.log(length);
-                    for(var j = (i === _sp.y ? _sp.x : 0); j <= (i === _ep.y ? _ep.x : length - 1); j++){
-                        var targetItem = rowTargetItem.children[0].contentItem.children[j];
-                        /*rowTargetItem.children[0] is the rectangle.*/
-                        //console.log(targetItem.text);
-                        if(mode === "highlight") targetItem.isHighlight = true;
-                        else if (mode === "clear") targetItem.isHighlight = false;
-                    }
+            function drawHighlightRange(startPoint, dl, mode){
+//                for(var i = startPoint.y; i <= _ep.y; i++){
+//                    var rowTargetItem = columnView.contentItem.children[i];//row rectangle
+//                    var length = rowTargetItem.children[0].count;//number of row items
+//                    console.log(length);
+//                    for(var j = (i === _sp.y ? _sp.x : 0); j <= (i === _ep.y ? _ep.x : length - 1); j++){
+//                        var targetItem = rowTargetItem.children[0].contentItem.children[j];
+//                        /*rowTargetItem.children[0] is the rectangle.*/
+//                        //console.log(targetItem.text);
+//                        if(mode === "highlight") targetItem.isHighlight = true;
+//                        else if (mode === "clear") targetItem.isHighlight = false;
+//                    }
+//                }
+                var rowTargetItem = columnView.contentItem.children[startPoint.y];
+                for(var i = startPoint.x; i < dl; i++){
+                    var targetItem = rowTargetItem.children[0].contentItem.children[i];
+                    if(mode === "na") targetItem.highlightMode = "na";
+                    else if(mode === "ac") targetItem.highlightMode = "ac";
+                    else if (mode === "clear") targetItem.highlightMode = "";
                 }
             }
 
@@ -551,7 +571,6 @@ ApplicationWindow {
                 }
             }
         }
-
         Shortcut{//search
             sequence: "Ctrl+F"
             onActivated: {
@@ -679,8 +698,12 @@ ApplicationWindow {
             nowLine.splice(nowLine.length - 1, 0, nextLine.splice(0, nextLine.length - 1));
             textModel.remove(row + 1);
         }
+        /*--------高亮操作--------*/
         onHightlight:{
-            columnView.drawHighlightRange(Qt.point(row, column), Qt.point(row, column + length - 1), 'hightlight');
+            columnView.drawHighlightRange(Qt.point(column, row), length, 'na');
+        }
+        onHighlightCurrent:{
+            columnView.drawHighlightRange(Qt.point(column, row), length, 'ac');
         }
     }
 }
