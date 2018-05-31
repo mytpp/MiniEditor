@@ -25,7 +25,7 @@ TextFile::TextFile()
       historyList(),
       nextCommand(historyList.end())
 {
-    text->insert({0,0}, QChar('\n'));
+    //text->insert({0,0}, QChar('\n'));
     qDebug()<<"Empty TextFile Construted";
     //qDebug()<<QUrl("file:file.txt").url();
 }
@@ -47,8 +47,8 @@ TextFile::TextFile(QUrl address)
         QString line_16bit;
         for (int i=0; std::getline(file, line); i++) {
             line_16bit = QString::fromLocal8Bit(line.c_str());
-            text->insert({i,0}, QChar('\n'));
             text->insert({i,1}, line_16bit);
+            text->insert({i,0}, QChar('\n'));
         }
         file.close();
     } else {
@@ -190,7 +190,8 @@ void TextFile::showNext()
 
 void TextFile::replaceAll(QString newString)
 {
-    //search(format, cs);   //hope user click "search" button manually
+    if((searchVisitor->getResult()).empty())
+        return;
     std::shared_ptr<SearchVisitor> searchInfo =
             std::make_shared<SearchVisitor>(*searchVisitor);//synthesized copy constructor will work
     std::shared_ptr<ReplaceCommand> replaceCommand(
@@ -211,7 +212,10 @@ void TextFile::replaceCurrent(QString newString)
     eraseStr(row, column, row, column+length);
     insert(row, column, newString);
     //erase the replaced item from search result
-    (searchVisitor->getResult()).erase(currentSearchResult);
+    auto iter = (searchVisitor->getResult()).erase(currentSearchResult);
+    //adjust the positions in search result which is in the same line as 'currentSearchResult'
+    while(iter!=(searchVisitor->getResult()).end() && iter->first == row)
+        iter->second += newString.size() - length;
     emit highlightCurrent(row, column, newString.size());
 }
 

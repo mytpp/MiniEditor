@@ -16,7 +16,6 @@ void Application::addFile(QUrl address)
         openFiles.push_back(TextFile());
     else
         openFiles.push_back(TextFile(address));
-    emit fileLoaded(openFiles.back().fileName());
     setCurrentFile(--openFiles.end()); //call display()
 }
 
@@ -41,18 +40,22 @@ void Application::setCurrentFile(std::list<TextFile>::iterator index)
 
 void Application::save()
 {
+    if(current == openFiles.end())
+        return;
     current->save();
 }
 
 void Application::saveAs()
 {
+    if(current == openFiles.end())
+        return;
     current->saveAs();
 }
 
 bool Application::close()
 {
-    if(!current->canClose())
-        return false;  //useless
+    if(current == openFiles.end() || !current->canClose())
+        return false;  //useless, whether a file closed successfully is determined by destroy() signal
     auto i = openFiles.erase(current);//QObject emit destroyed signal, which is to be handled by QML
     if(!openFiles.empty()) {
         if(i == openFiles.end())
@@ -74,6 +77,7 @@ bool Application::closeAll()
     }
     if(openFiles.empty())
         return true;
+    setCurrentFile(openFiles.begin());
     return false;
 }
 
