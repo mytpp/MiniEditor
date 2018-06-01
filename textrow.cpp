@@ -1,18 +1,22 @@
 #include "textrow.h"
 #include "visitor\abstractvisitor.h"
 
+
+
 TextRow::TextRow()
 {
     row.push_back(QChar('\n'));
 }
 
 
-TextRow::TextRow(Qstring text)
+TextRow::TextRow(QString text)
 {
-    row.push_back(Qstring(text));
+    int i;
+    for(i=0;i<text.size();i++)
+          row.push_back(text[i]);
 }
 
-TextRow::QChar& operator[](int position)
+QChar& TextRow::operator[](int position)
 {
     return row[position];
 }
@@ -25,7 +29,7 @@ bool TextRow::insert(int position, QChar cha)
     int insert_position = position;
     int i;
     
-    if( position > current_capacity  ||  positon > current_size )
+    if( position > current_capacity  ||  position > current_size )
           return false;                       //considering the position is undesirable
    
     if(position==current_capacity)
@@ -45,19 +49,25 @@ bool TextRow::insert(int position, QChar cha)
 bool TextRow::insert(int position, QString str)
 {
     int length = str.size();
+    int current_capacity=row.capacity();
+    int current_size = row.size();
     if(length==0)
         return true;
     
-    if( position > current_capacity  ||  positon > current_size )
+    if( position > current_capacity  ||  position > current_size )
         return false;                           //considering the position is undesirable                        //considering oversteping the boundry
     
     if( current_size+length >= current_capacity )
     {    
-        int n = length\50 + (length % 50 == 0)?0:1 ;
-        row.reserve(current_capacity+n*50);     //considering the space is not enough
+        int n=length/50;
+        if( length%50!=0 )
+        {
+              n = n+1;
+        }
+        row.reserve(current_capacity+n*50);      //considering the space is not enough
     }
     
-    Qchar* data=str.data();
+    QChar* data=str.data();
     int i=0;
     while(row[position]!='\n')
     {     
@@ -76,7 +86,7 @@ bool TextRow::erase(int position)
     int current_capacity=row.capacity();
     int current_size = row.size();
     
-    if( position > current_capacity  ||  positon > current_size )
+    if( position > current_capacity  ||  position > current_size )
         return false;                           //considering the position is undesirable                        //considering oversteping the boundry
     
     
@@ -84,10 +94,11 @@ bool TextRow::erase(int position)
 
 bool TextRow::erase(int begin, int end)
 {
-    
+    return true;
+
 }
 
 bool TextRow::traverse(AbstractVisitor &visitor)
 {
-    
+    return true;
 }
