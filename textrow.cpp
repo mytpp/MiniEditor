@@ -9,7 +9,7 @@ TextRow::TextRow()
 }
 
 
-TextRow::TextRow(QString text)
+TextRow::TextRow(QString text)     //添加新内容到一行中
 {
     int i;
     for(i=0;i<text.size();i++)
@@ -87,7 +87,8 @@ bool TextRow::erase(int position)
     int current_size = row.size();
     
     if( position > current_capacity  ||  position > current_size )
-        return false;                           //considering the position is undesirable                        //considering oversteping the boundry
+        return false;
+    //considering the position is undesirable                        //considering oversteping the boundry
     
     
 }
