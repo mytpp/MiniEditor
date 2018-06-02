@@ -71,6 +71,8 @@ TextFile::TextFile(const TextFile &afile)
     qDebug()<<"TextFile Copy Constructed";
 }
 
+TextFile::~TextFile() = default;
+
 void TextFile::display()
 {
     DisplayVisitor display(this);
@@ -135,12 +137,17 @@ const QString TextFile::fileName() const
     return name;
 }
 
-void TextFile::addCommand(std::shared_ptr<EditCommand> command)
+void TextFile::addCommand(std::unique_ptr<EditCommand> &&command)
 {
     historyList.erase(nextCommand, historyList.end());
-    historyList.push_back(command);
+    historyList.push_back(std::move(command));
     nextCommand = historyList.end();
     isModified = true;
+
+    /*cut the history list size to 50*/
+    if(historyList.size() > 100)
+        for(auto i=0; i < 50; i++)
+            historyList.pop_front();
 }
 
 void TextFile::highlightAll(int length)
@@ -153,11 +160,12 @@ void TextFile::highlightAll(int length)
 
 bool TextFile::search(QString format, Qt::CaseSensitivity cs)
 {
-    searchVisitor = std::make_shared<SearchVisitor>(format,cs);
+    searchVisitor = std::make_unique<SearchVisitor>(format,cs);
     text->traverse(*searchVisitor);
     if(searchVisitor->noResult())
         return false;
-    highlightAll(format.size());
+
+    emit highlightAll(format.size());
     currentSearchResult = searchVisitor->getResult().begin();
     emit highlightCurrent(currentSearchResult->first, currentSearchResult->second, format.size());
     return true;
@@ -170,9 +178,11 @@ void TextFile::showPrevious()
     if(currentSearchResult == searchVisitor->getResult().cbegin())
         currentSearchResult = searchVisitor->getResult().end();
     --currentSearchResult;
-    emit highlightCurrent(currentSearchResult->first,
-                       currentSearchResult->second,
-                       searchVisitor->getFormat().size());
+    emit highlightCurrent(
+                currentSearchResult->first,
+                currentSearchResult->second,
+                searchVisitor->getFormat().size()
+    );
 }
 
 void TextFile::showNext()
@@ -183,23 +193,36 @@ void TextFile::showNext()
         currentSearchResult = searchVisitor->getResult().begin();
     else
         ++currentSearchResult;
-    emit highlightCurrent(currentSearchResult->first,
-                       currentSearchResult->second,
-                       searchVisitor->getFormat().size());
+    emit highlightCurrent(
+                currentSearchResult->first,
+                currentSearchResult->second,
+                searchVisitor->getFormat().size()
+    );
 }
 
 void TextFile::replaceAll(QString newString)
 {
     if((searchVisitor->getResult()).empty())
         return;
-    std::shared_ptr<SearchVisitor> searchInfo =
-            std::make_shared<SearchVisitor>(*searchVisitor);//synthesized copy constructor will work
-    std::shared_ptr<ReplaceCommand> replaceCommand(
-                new ReplaceCommand(searchInfo, newString, text, this));
+    auto replaceCommand = std::make_unique<ReplaceCommand>(
+                    std::make_unique<SearchVisitor>(*searchVisitor), //synthesized copy constructor will work
+                    newString, text, this);
     (*replaceCommand)();
-    addCommand(replaceCommand);
-    highlightAll(newString.size());
-    (searchVisitor->getResult()).clear();
+    addCommand(std::move(replaceCommand));
+
+    /*adjust all positions in search result*/
+    int offset = 0;
+    int currentLine = 0;
+    int length = (searchVisitor->getFormat()).size();
+    auto &result = searchVisitor->getResult();
+    for(auto& pos : result) {
+        if(currentLine != pos.first)
+            offset = 0;
+        pos.second += length*offset;
+        offset++;
+    }
+
+    emit highlightAll(newString.size());
 }
 
 void TextFile::replaceCurrent(QString newString)
@@ -209,13 +232,18 @@ void TextFile::replaceCurrent(QString newString)
     int row = currentSearchResult->first;
     int column = currentSearchResult->second;
     int length = (searchVisitor->getFormat()).size();
+
     eraseStr(row, column, row, column+length);
     insert(row, column, newString);
+
     //erase the replaced item from search result
     auto iter = (searchVisitor->getResult()).erase(currentSearchResult);
+
     //adjust the positions in search result which is in the same line as 'currentSearchResult'
-    while(iter!=(searchVisitor->getResult()).end() && iter->first == row)
+    auto &result = searchVisitor->getResult();
+    while(iter!=result.end() && iter->first == row)
         iter->second += newString.size() - length;
+
     emit highlightCurrent(row, column, newString.size());
 }
 
@@ -240,34 +268,36 @@ void TextFile::paste(int row, int column)
 
 void TextFile::insert(int row, int column, QChar character)
 {
-    std::shared_ptr<InsertCommand> insertCommand(
-                new InsertCommand({row, column}, character, text, this));
+    auto insertCommand = std::make_unique<InsertCommand>(
+               std::make_pair(row, column), character, text, this);
     (*insertCommand)();
-    addCommand(insertCommand);
+    addCommand(std::move(insertCommand));
 }
 
 void TextFile::insert(int row, int column, QString newString)
 {
-    std::shared_ptr<InsertCommand> insertCommand(
-                new InsertCommand({row, column}, newString, text, this));
+    auto insertCommand = std::make_unique<InsertCommand>(
+               std::make_pair(row, column), newString, text, this);
     (*insertCommand)();
-    addCommand(insertCommand);
+    addCommand(std::move(insertCommand));
 }
 
 void TextFile::erase(int row, int column)
 {
-    std::shared_ptr<EraseCommand> eraseCommand(
-                new EraseCommand({row, column}, text, this));
+    auto eraseCommand = std::make_unique<EraseCommand>(
+                std::make_pair(row, column), text, this);
     (*eraseCommand)();
-    addCommand(eraseCommand);
+    addCommand(std::move(eraseCommand));
 }
 
 void TextFile::erase(int rowBegin, int colBegin, int rowEnd, int colEnd)
 {
-    std::shared_ptr<EraseCommand> eraseCommand(
-                new EraseCommand({rowBegin, colBegin}, {rowEnd, colEnd}, text, this));
+    auto eraseCommand = std::make_unique<EraseCommand>(
+                std::make_pair(rowBegin, colBegin),
+                std::make_pair(rowEnd, colEnd),
+                text, this);
     (*eraseCommand)();
-    addCommand(eraseCommand);
+    addCommand(std::move(eraseCommand));
 }
 
 void TextFile::undo()
