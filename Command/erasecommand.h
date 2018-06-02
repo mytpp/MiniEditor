@@ -1,4 +1,4 @@
-#ifndef ERASECOMMAND_H
+﻿#ifndef ERASECOMMAND_H
 #define ERASECOMMAND_H
 
 #include "editcommand.h"
@@ -32,7 +32,7 @@ private:
     std::pair<int,int> end;
     //before delete sth from the structure, store it for undo()
     //may contain '\n'. caution
-    QChar charater;
+    QChar character;
     QString chunk;
     //to emit modification signal through _invoker(a TextFile)
     TextFile *invoker;

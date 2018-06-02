@@ -75,7 +75,7 @@ signals:
     void eraseCha(int row, int column);
     //erase content between {rowBegin, colBegin}(included) and {rowEnd, colEnd}(excluded)
     //which may contain '\n'
-    void eraseStr(int rowBegin, int colBegin, int rowEnd, int colEnd);
+    void eraseStr(int rowBegin, int columnBegin, int rowEnd, int columnEnd);
     void eraseLine(int row);//'row' should be greater than 0, the first row is never to be erased
                             //merge line 'row' with the previous line or erase an empty line
 
