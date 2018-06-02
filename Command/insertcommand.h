@@ -1,4 +1,4 @@
-#ifndef INSERTCOMMAND_H
+﻿#ifndef INSERTCOMMAND_H
 #define INSERTCOMMAND_H
 
 #include "editcommand.h"
@@ -34,7 +34,7 @@ private:
     std::pair<int,int> begin;
     std::pair<int,int> end;
     //for redo()
-    QChar charater;
+    QChar character;
     QString chunk;
     //to emit modification signal through _invoker(a TextFile)
     TextFile *invoker;
