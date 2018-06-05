@@ -34,9 +34,6 @@ ApplicationWindow {
             ListElement{
                 name:'社会主义从空想到科学的发展'
             }
-            ListElement{
-                name:'概率论与数理统计'
-            }
         }
 
         ListView{
@@ -167,6 +164,19 @@ ApplicationWindow {
                     }
                 }
                 ToolSeparator {}
+                ToolButton {//test
+                    text: "add"
+                    onClicked: {
+                        textModel.clear();
+                        for(var i = 0; i < 100; i++){
+                            textModel.append({attributes:[]})
+                            textModel.get(i).attributes.append({description: i.toString()});
+                            for(var j = 0; j < 150; j++){
+                                textModel.get(i).attributes.append({description: '蛤'});
+                            }
+                        }
+                    }
+                }
             }
 
             Text{
@@ -297,7 +307,7 @@ ApplicationWindow {
         anchors.topMargin: 10
         anchors.left: parent.left
         anchors.leftMargin: 5
-        height: root.height - (tabs.height + iconBar.height) - this.anchors.topMargin
+        anchors.bottom: parent.bottom
         clip: true
         /*Clip the ListView inside, means this.height < columnView.height, and width.*/
 
@@ -365,6 +375,7 @@ ApplicationWindow {
                                  (columnView.selectStart.x > columnView.selectEnd.x &&
                                   columnView.selectStart.y === columnView.selectEnd.y)) ?
                                     columnView.selectStart : columnView.selectEnd
+            property real lastFlicked: 0
 
             /*change the state of items, set to high light
              *@params: {Qt.point} startPoint point to start drawing color
@@ -411,10 +422,12 @@ ApplicationWindow {
 
             MouseArea{
                 anchors.fill: parent
+                cursorShape: Qt.IBeamCursor
                 onClicked: {
                     inputBus.focus = true;//activate inputBus
-                    var targetRow = columnView.itemAt(mouseX, mouseY);
+                    var targetRow = columnView.itemAt(mouseX, mouseY + columnView.contentY);
                     var targetItem = targetRow.children[0].itemAt(mouseX, 0);
+                    console.log(columnView.indexAt(mouseX, mouseY + columnView.contentY));
 //                    var element = {
 //                        attributes:[]
 //                    };
@@ -425,29 +438,31 @@ ApplicationWindow {
                     if ((mouse.button == Qt.LeftButton) && (mouse.modifiers & Qt.ShiftModifier)){
                         //shift + leftClick设置选区
                         var rowIndex = columnView.indexAt(mouseX, mouseY);//y-axis
-                        var columnIndex = rowIndex !== -1 ? columnView.itemAt(mouseX, mouseY).children[0].indexAt(mouseX, 0) : -1;//x-axis
+                        var columnIndex = rowIndex !== -1 ? columnView.itemAt(mouseX, mouseY + columnView.contentY).children[0].indexAt(mouseX, 0) : -1;//x-axis
                         if(rowIndex >= 0 && columnIndex >= 0){
                             //获取之前光标所在位置，设置为选区起点
-                            parent.selectStart.y = columnView.indexAt(cursor.x, cursor.y);
-                            parent.selectStart.x = columnView.itemAt(cursor.x, cursor.y).children[0].indexAt(cursor.x, 0);
+                            parent.selectStart.y = columnView.indexAt(cursor.x, cursor.y + columnView.contentY);
+                            parent.selectStart.x = columnView.itemAt(cursor.x, cursor.y + columnView.contentY).children[0].indexAt(cursor.x, 0);
                             //设置选区终点为当前鼠标所在位置
-                            parent.selectEnd.y = columnView.indexAt(mouseX, mouseY);
-                            parent.selectEnd.x = columnView.itemAt(mouseX, mouseY).children[0].indexAt(mouseX, 0);
+                            parent.selectEnd.y = columnView.indexAt(mouseX, mouseY + columnView.contentY);
+                            parent.selectEnd.x = columnView.itemAt(mouseX, mouseY + columnView.contentY).children[0].indexAt(mouseX, 0);
                         }
                     }
 
                     //设置光标位置
                     cursor.x = targetItem.x;
-                    cursor.y = targetRow.y;
+                    cursor.y = targetRow.y - columnView.contentY;
+                    cursor.save_mouseX = mouseX;
+                    cursor.save_mouseY = mouseY;
                 }
                 onPositionChanged: {
                     /*since the hoverEnable is false, will only matter when pressed down*/
-                    var rowIndex = columnView.indexAt(mouseX, mouseY);//y-axis
-                    var columnIndex = rowIndex !== -1 ? columnView.itemAt(mouseX, mouseY).children[0].indexAt(mouseX, 0) : -1;//x-axis
+                    var rowIndex = columnView.indexAt(mouseX, mouseY + columnView.contentY);//y-axis
+                    var columnIndex = rowIndex !== -1 ? columnView.itemAt(mouseX, mouseY + columnView.contentY).children[0].indexAt(mouseX, 0) : -1;//x-axis
                     if(rowIndex >= 0 && columnIndex >= 0){
                         var _end = Qt.point(parent.selectEnd.x, parent.selectEnd.y)
-                        parent.selectEnd.y = columnView.indexAt(mouseX, mouseY);
-                        parent.selectEnd.x = columnView.itemAt(mouseX, mouseY).children[0].indexAt(mouseX, 0);
+                        parent.selectEnd.y = columnView.indexAt(mouseX, mouseY + columnView.contentY);
+                        parent.selectEnd.x = columnView.itemAt(mouseX, mouseY + columnView.contentY).children[0].indexAt(mouseX, 0);
                         if(!parent.isSelecting){//init selected range
                             parent.selectStart.y = parent.selectEnd.y
                             parent.selectStart.x = parent.selectEnd.x
@@ -471,12 +486,12 @@ ApplicationWindow {
                 }
                 onReleased: {
                     if(!parent.isSelecting){
-                        var rowIndex = columnView.indexAt(mouseX, mouseY);//y-axis
+                        var rowIndex = columnView.indexAt(mouseX, mouseY + columnView.contentY);//y-axis
                         var columnIndex = rowIndex !== -1 ? columnView.itemAt(mouseX, mouseY).children[0].indexAt(mouseX, 0) : -1;//x-axis
                         if(rowIndex >= 0 && columnIndex >= 0){
                             var _end = Qt.point(parent.selectEnd.x, parent.selectEnd.y)
-                            parent.selectEnd.y = columnView.indexAt(mouseX, mouseY);
-                            parent.selectEnd.x = columnView.itemAt(mouseX, mouseY).children[0].indexAt(mouseX, 0)
+                            parent.selectEnd.y = columnView.indexAt(mouseX, mouseY + columnView.contentY);
+                            parent.selectEnd.x = columnView.itemAt(mouseX, mouseY + columnView.contentY).children[0].indexAt(mouseX, 0)
                             if(!parent.isSelecting){//init selected range
                                 parent.selectStart.y = parent.selectEnd.y
                                 parent.selectStart.x = parent.selectEnd.x
@@ -484,6 +499,9 @@ ApplicationWindow {
                         }
                     }
                     parent.isSelecting = false;
+                }
+                onWheel: {
+                    parent.flick(0, wheel.angleDelta.y * 5);
                 }
             }
 
@@ -495,7 +513,8 @@ ApplicationWindow {
                 x:0
                 y:0
                 color: "#1772b4"
-                radius: 1
+                property real save_mouseX: 0
+                property real save_mouseY: 0
                 SequentialAnimation{//闪烁动画
                     running: true
                     loops: Animation.Infinite
@@ -509,9 +528,22 @@ ApplicationWindow {
                         target: cursor
                         property: "opacity"
                         to: 1
+                        duration: 600
+                    }
+                    NumberAnimation{
+                        target: cursor
+                        property: "opacity"
+                        to: 1
                         duration: 400
                     }
                 }
+            }
+
+            onMovementStarted: {
+                lastFlicked = contentY;
+            }
+            onMovementEnded: {
+                cursor.y -= contentY - lastFlicked;
             }
         }
 
