@@ -1,9 +1,15 @@
-#include "textstructure.h"
+﻿#include "textstructure.h"
 #include "Visitor/abstractvisitor.h"
 
 
 TextStructure::TextStructure()
 {
+}
+
+QChar& TextStructure::data(std::pair<int,int> position)
+{
+    QChar text('a');
+    return text;
 }
 
 const QString TextStructure::data(std::pair<int, int> begin, std::pair<int, int> end) const

@@ -105,6 +105,10 @@ TextFile中维护一个command的列表（historyList，使用STL中的list封�
 
 ![undo redo](undo%20redo2.png)
 
+>注意：  
+>记录执行过的写操作的历史列表长度最大为50！  
+>但是只有当执行过的写操作数超过100时才会将该列表的前50项砍掉。
+
 
 ## Property Documentation
 `isModified : bool`   

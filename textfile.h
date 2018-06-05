@@ -18,12 +18,13 @@ class TextFile: public QObject
     Q_OBJECT
 public:
     TextFile();                //unstored file
-
-    TextFile(const TextFile &);//requisite for std::list
-
     //construct the TextStructure according to the file been read
     //and display the file via QML
     TextFile(QUrl address);                                                  //use DisplayVisitor inside
+
+    TextFile(const TextFile &);//requisite for std::list
+
+    ~TextFile();
 
     void display();
 
@@ -74,7 +75,7 @@ signals:
     void eraseCha(int row, int column);
     //erase content between {rowBegin, colBegin}(included) and {rowEnd, colEnd}(excluded)
     //which may contain '\n'
-    void eraseStr(int rowBegin, int colBegin, int rowEnd, int colEnd);
+    void eraseStr(int rowBegin, int columnBegin, int rowEnd, int columnEnd);
     void eraseLine(int row);//'row' should be greater than 0, the first row is never to be erased
                             //merge line 'row' with the previous line or erase an empty line
 
@@ -84,7 +85,7 @@ signals:
 
 private:
     bool saveFile(QUrl path);
-    void addCommand(std::shared_ptr<EditCommand> command);
+    void addCommand(std::unique_ptr<EditCommand> &&command);
     void highlightAll(int length = 1);
 
 private:
@@ -93,10 +94,10 @@ private:
     QString name;
     std::shared_ptr<TextStructure> text;
     std::fstream file;
-    std::shared_ptr<SearchVisitor> searchVisitor;
+    std::unique_ptr<SearchVisitor> searchVisitor;
     std::vector<std::pair<int,int>>::iterator currentSearchResult;
-    std::list<std::shared_ptr<EditCommand>> historyList;
-    std::list<std::shared_ptr<EditCommand>>::iterator nextCommand;
+    std::list<std::unique_ptr<EditCommand>> historyList;
+    std::list<std::unique_ptr<EditCommand>>::iterator nextCommand;
 };
 
 #endif // TEXTFILE_H

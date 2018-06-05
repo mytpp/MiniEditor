@@ -17,6 +17,7 @@ ApplicationWindow {
         title: "Open"
         nameFilters: [ "TextFiles (*.txt)","All Files (*)" ]
         modality: Qt.WindowModal
+        selectExisting: false //allow to create new(maybe?)
         onAccepted: {
             console.log("open file:" + fileDialog.fileUrl);
             app.addFile(fileDialog.fileUrl);
@@ -654,6 +655,16 @@ ApplicationWindow {
 //            //TODO:修改文件列表model
 //            currentFile.target = app.currentFile();
 //        }
+        onFileLoaded:{
+            for(var i = 0; i < openFiles.count; i++){
+                if(openFiles.at(i).name == name){
+                    openFileTabs.currentIndex = i;
+                    return;
+                }
+            }
+            openFiles.append({name: name});
+            openFileTabs.currentIndex = openFiles.count - 1;
+        }
     }
     Connections{
         id:currentFile
@@ -661,13 +672,13 @@ ApplicationWindow {
 
         /*----------修改Model操作----------*/
         onInsertCha:{//插入字符
-            if(str[i] !== '\n'){
+            if(cha !== '\n'){
                 textModel.at(row).attributes.splice(column, 0, {description: cha});
             }
             else{
                 textModel.insert(row + 1, {attributes:[{description:' '}]});//插入末尾空字符
                 var preLine = textModel.at(row).attributes;
-                textModel.at(row + 1).attributes.splice(0, 0, preLine.splice(i, preLine.length - 1 - i));
+                textModel.at(row + 1).attributes.splice(0, 0, preLine.splice(columu, preLine.length - 1 - column));
             }
         }
         onInsertStr:{//插入字符串
@@ -684,13 +695,53 @@ ApplicationWindow {
                     }
                     element.attributes.push({description:' '});
                     textModel.insert(_row + 1, element);
+                    var preLine = textModel.at(_row).attributes;
+                    textModel.at(_row + 1).attributes.splice(0, 0, preLine.splice(_column, preLine.length - 1 - _column));
                     _row++;
                     _column = 0;
                 }
             }
         }
         onEraseCha:{//删除字符
+            var myChar = textModel.at(row).attributes[column].description;
             textModel.at(row).attributes.splice(column, 1);
+            if(myChar == ' '){
+                //删去换行符后将下一行内容拷贝到末尾，删去下一行
+                var nextLine = textModel.at(row + 1).attributes;
+                textModel.at(row).attributes.splice(column, 0, nextLine);
+                textModel.remove(row + 1);
+            }
+        }
+        onEraseStr:{
+            if(rowEnd == rowBegin){
+                if(columnEnd - columnBegin == textModel.at(rowBegin).attributes.length){
+                    textModel.remove(rowBegin);
+                }
+                else{
+                    textModel.at(rowBegin).attributes.splice(columnBegin, columnEnd - columnBegin);
+                }
+            }
+            else {
+                for(var i = rowEnd; i >= rowBegin; i--){
+                    if(i == rowEnd){//最后一行
+                        if(columnEnd == textModel.at(i).attributes.length){
+                            textModel.remove(i);
+                        }
+                        else{
+                            textModel.at(i).attributes.splice(0, columnEnd);
+                        }
+                    }
+                    else if(i == rowBegin){//第一行
+                        var nextLine = textModel.at(i + 1).attributes;
+                        var line = textModel.at(i).attributes;
+                        line.splice(columnBegin, line.length - columnBegin, nextLine);
+                        textModel.remove(i + 1);//remove nextLine
+                    }
+                    else{//中间行
+                        textModel.remove(i);
+                    }
+                }
+            }
         }
         onEraseLine:{//删除一行末尾的换行符
             var nowLine = textModel.at(row).attributes;
@@ -704,6 +755,9 @@ ApplicationWindow {
         }
         onHighlightCurrent:{
             columnView.drawHighlightRange(Qt.point(column, row), length, 'ac');
+        }
+        onDestroyed: {
+            openFiles.remove(openFileTabs.currentIndex);
         }
     }
 }
