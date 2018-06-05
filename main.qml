@@ -165,17 +165,14 @@ ApplicationWindow {
                 }
                 ToolSeparator {}
                 ToolButton {//test
-                    text: "add"
+                    id:boomer
+                    text: "boom"
                     onClicked: {
-                        textModel.clear();
-                        for(var i = 0; i < 100; i++){
-                            textModel.append({attributes:[]})
-                            textModel.get(i).attributes.append({description: i.toString()});
-                            for(var j = 0; j < 150; j++){
-                                textModel.get(i).attributes.append({description: '蛤'});
-                            }
-                        }
+                        //textModel.get(0).attributes.remove(0, 5);
+                        insertCha(0, 0, '\n');
                     }
+
+                    signal insertCha(int column,int row,string cha);
                 }
             }
 
@@ -427,7 +424,7 @@ ApplicationWindow {
                     inputBus.focus = true;//activate inputBus
                     var targetRow = columnView.itemAt(mouseX, mouseY + columnView.contentY);
                     var targetItem = targetRow.children[0].itemAt(mouseX, 0);
-                    console.log(columnView.indexAt(mouseX, mouseY + columnView.contentY));
+
 //                    var element = {
 //                        attributes:[]
 //                    };
@@ -452,8 +449,6 @@ ApplicationWindow {
                     //设置光标位置
                     cursor.x = targetItem.x;
                     cursor.y = targetRow.y - columnView.contentY;
-                    cursor.save_mouseX = mouseX;
-                    cursor.save_mouseY = mouseY;
                 }
                 onPositionChanged: {
                     /*since the hoverEnable is false, will only matter when pressed down*/
@@ -462,7 +457,10 @@ ApplicationWindow {
                     if(rowIndex >= 0 && columnIndex >= 0){
                         var _end = Qt.point(parent.selectEnd.x, parent.selectEnd.y)
                         parent.selectEnd.y = columnView.indexAt(mouseX, mouseY + columnView.contentY);
-                        parent.selectEnd.x = columnView.itemAt(mouseX, mouseY + columnView.contentY).children[0].indexAt(mouseX, 0);
+                        var lineView = columnView.itemAt(mouseX, mouseY + columnView.contentY).children[0];
+                        parent.selectEnd.x = lineView.indexAt(mouseX, 0);
+                        parent.currentIndex = parent.selectEnd.y;//set current index
+                        lineView.currentIndex = parent.selectEnd.x;//set current index
                         if(!parent.isSelecting){//init selected range
                             parent.selectStart.y = parent.selectEnd.y
                             parent.selectStart.x = parent.selectEnd.x
@@ -491,7 +489,10 @@ ApplicationWindow {
                         if(rowIndex >= 0 && columnIndex >= 0){
                             var _end = Qt.point(parent.selectEnd.x, parent.selectEnd.y)
                             parent.selectEnd.y = columnView.indexAt(mouseX, mouseY + columnView.contentY);
-                            parent.selectEnd.x = columnView.itemAt(mouseX, mouseY + columnView.contentY).children[0].indexAt(mouseX, 0)
+                            var lineView = columnView.itemAt(mouseX, mouseY + columnView.contentY).children[0];
+                            parent.selectEnd.x = lineView.indexAt(mouseX, 0);
+                            parent.currentIndex = parent.selectEnd.y;//set current index
+                            lineView.currentIndex = parent.selectEnd.x;//set current index
                             if(!parent.isSelecting){//init selected range
                                 parent.selectStart.y = parent.selectEnd.y
                                 parent.selectStart.x = parent.selectEnd.x
@@ -536,6 +537,10 @@ ApplicationWindow {
                         to: 1
                         duration: 400
                     }
+                }
+                function fixPosition(){
+                    this.x = columnView.currentItem.children[0].currentItem.x;
+                    this.y = columnView.currentItem.y;
                 }
             }
 
@@ -700,17 +705,32 @@ ApplicationWindow {
     }
     Connections{
         id:currentFile
-        target: null
+        target: boomer
 
         /*----------修改Model操作----------*/
         onInsertCha:{//插入字符
             if(cha !== '\n'){
-                textModel.at(row).attributes.splice(column, 0, {description: cha});
+                textModel.get(row).attributes.insert(column, {description: cha});
+                //修复插入后光标位置
+                columnView.selectStart.x++;
+                columnView.selectEnd.x++;
+                columnView.currentItem.children[0].currentIndex++;
+                cursor.fixPosition();
             }
             else{
                 textModel.insert(row + 1, {attributes:[{description:' '}]});//插入末尾空字符
-                var preLine = textModel.at(row).attributes;
-                textModel.at(row + 1).attributes.splice(0, 0, preLine.splice(columu, preLine.length - 1 - column));
+                var preLine = textModel.get(row).attributes;
+                //textModel.get(row + 1).attributes.splice(0, 0, preLine.splice(columu, preLine.length - 1 - column));
+                for(var i = preLine.count - 2; i >= column; i--){
+                    textModel.get(row + 1).attributes.insert(0, preLine.get(i));
+                    preLine.remove(i);
+                }
+
+                columnView.selectStart.x = columnView.selectEnd.x = 0;
+                columnView.selectStart.y++;
+                columnView.selectEnd.y++;
+                columnView.currentIndex++;
+                cursor.fixPosition();
             }
         }
         onInsertStr:{//插入字符串
