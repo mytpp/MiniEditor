@@ -169,10 +169,16 @@ ApplicationWindow {
                     text: "boom"
                     onClicked: {
                         //textModel.get(0).attributes.remove(0, 5);
-                        insertCha(0, 0, '\n');
+                        //insertCha(columnView._ep.x, columnView._ep.y, 't');
+                        //insertStr(columnView._ep.x, columnView._ep.y, 'The quick brown fox jumps over the lazy dog\n The quick brown fox jump sover the lazy dog');
+                        //eraseCha(columnView._ep.x, columnView._ep.y);
+                        eraseStr(columnView._sp.x, columnView._sp.y, columnView._ep.x, columnView._ep.y);
                     }
 
                     signal insertCha(int column,int row,string cha);
+                    signal insertStr(int column, int row, string str);
+                    signal eraseCha(int column, int row);
+                    signal eraseStr(int columnBegin, int rowBegin, int columnEnd, int rowEnd);
                 }
             }
 
@@ -380,18 +386,6 @@ ApplicationWindow {
              *@params: {string} mode "clear" or "highlight" or maybe more
              */
             function drawHighlightRange(startPoint, dl, mode){
-//                for(var i = startPoint.y; i <= _ep.y; i++){
-//                    var rowTargetItem = columnView.contentItem.children[i];//row rectangle
-//                    var length = rowTargetItem.children[0].count;//number of row items
-//                    console.log(length);
-//                    for(var j = (i === _sp.y ? _sp.x : 0); j <= (i === _ep.y ? _ep.x : length - 1); j++){
-//                        var targetItem = rowTargetItem.children[0].contentItem.children[j];
-//                        /*rowTargetItem.children[0] is the rectangle.*/
-//                        //console.log(targetItem.text);
-//                        if(mode === "highlight") targetItem.isHighlight = true;
-//                        else if (mode === "clear") targetItem.isHighlight = false;
-//                    }
-//                }
                 var rowTargetItem = columnView.contentItem.children[startPoint.y];
                 for(var i = startPoint.x; i < dl; i++){
                     var targetItem = rowTargetItem.children[0].contentItem.children[i];
@@ -425,13 +419,6 @@ ApplicationWindow {
                     var targetRow = columnView.itemAt(mouseX, mouseY + columnView.contentY);
                     var targetItem = targetRow.children[0].itemAt(mouseX, 0);
 
-//                    var element = {
-//                        attributes:[]
-//                    };
-//                    for(var t = 0; t < Math.random() * 10; t++){
-//                        element.attributes.push({description:"n"})
-//                    }
-//                    textModel.append(element);
                     if ((mouse.button == Qt.LeftButton) && (mouse.modifiers & Qt.ShiftModifier)){
                         //shift + leftClick设置选区
                         var rowIndex = columnView.indexAt(mouseX, mouseY);//y-axis
@@ -738,7 +725,10 @@ ApplicationWindow {
             var _column = column;
             for(var i = 0; i < str.length; i++){
                 if(str[i] !== '\n'){
-                    textModel.at(_row).attributes.splice(_column, 0, {description: str[i]});
+                    textModel.get(_row).attributes.insert(_column, {description: str[i]});
+                    columnView.selectStart.x++;
+                    columnView.selectEnd.x++;
+                    columnView.currentItem.children[0].currentIndex++;
                     _column++;
                 }
                 else{
@@ -747,59 +737,98 @@ ApplicationWindow {
                     }
                     element.attributes.push({description:' '});
                     textModel.insert(_row + 1, element);
-                    var preLine = textModel.at(_row).attributes;
-                    textModel.at(_row + 1).attributes.splice(0, 0, preLine.splice(_column, preLine.length - 1 - _column));
+                    var preLine = textModel.get(_row).attributes;
+                    //textModel.at(_row + 1).attributes.splice(0, 0, preLine.splice(_column, preLine.length - 1 - _column));
+                    for(var j = preLine.count - 2; j >= _column; j--){
+                        textModel.get(row + 1).attributes.insert(0, preLine.get(j));
+                        preLine.remove(j);
+                    }
+                    columnView.selectStart.x = columnView.selectEnd.x = 0;
+                    columnView.selectStart.y++;
+                    columnView.selectEnd.y++;
+                    columnView.currentIndex++;
                     _row++;
                     _column = 0;
                 }
             }
+            cursor.fixPosition();
         }
         onEraseCha:{//删除字符
-            var myChar = textModel.at(row).attributes[column].description;
-            textModel.at(row).attributes.splice(column, 1);
-            if(myChar == ' '){
-                //删去换行符后将下一行内容拷贝到末尾，删去下一行
-                var nextLine = textModel.at(row + 1).attributes;
-                textModel.at(row).attributes.splice(column, 0, nextLine);
+            var nextLine = textModel.get(row + 1).attributes;//下一行
+            var nowLine = textModel.get(row).attributes;//当前行
+            if(column == nowLine.count - 1){//删除该行末尾换行符
+                nowLine.remove(column);
+                for(var j = 0; j < nextLine.count; j++){
+                    nowLine.append(nextLine.get(j));
+                }
                 textModel.remove(row + 1);
             }
+            else{
+                nowLine.remove(column);
+            }
+
+            columnView.selectStart.y = columnView.selectEnd.y = row;
+            columnView.selectStart.x = columnView.selectEnd.x = column;
+            columnView.currentIndex = row;
+            columnView.currentItem.children[0].currentIndex = column;
+            cursor.fixPosition();
         }
         onEraseStr:{
             if(rowEnd == rowBegin){
-                if(columnEnd - columnBegin == textModel.at(rowBegin).attributes.length){
+                if(columnEnd - columnBegin == textModel.get(rowBegin).attributes.count){
                     textModel.remove(rowBegin);
+                    columnView.selectStart.y = columnView.selectEnd.y = columnView.currentIndex = rowBegin - 1;
+                    columnView.selectStart.x = columnView.selectEnd.x = textModel.get(rowBegin - 1).attributes.count - 1;
+                    columnView.currentItem.children[0].currentIndex = textModel.get(rowBegin - 1).attributes.count - 1;
                 }
                 else{
-                    textModel.at(rowBegin).attributes.splice(columnBegin, columnEnd - columnBegin);
+                    textModel.get(rowBegin).attributes.remove(columnBegin, columnEnd - columnBegin);
+                    columnView.selectStart.x = columnView.selectEnd.x = columnBegin;
+                    columnView.currentItem.children[0].currentIndex = columnBegin;
                 }
             }
             else {
                 for(var i = rowEnd; i >= rowBegin; i--){
                     if(i == rowEnd){//最后一行
-                        if(columnEnd == textModel.at(i).attributes.length){
+                        if(columnEnd == textModel.get(i).attributes.count || columnEnd == textModel.get(i).attributes.count - 1){
                             textModel.remove(i);
                         }
                         else{
-                            textModel.at(i).attributes.splice(0, columnEnd);
+                            textModel.get(i).attributes.remove(0, columnEnd);
                         }
                     }
                     else if(i == rowBegin){//第一行
-                        var nextLine = textModel.at(i + 1).attributes;
-                        var line = textModel.at(i).attributes;
-                        line.splice(columnBegin, line.length - columnBegin, nextLine);
+                        var nextLine = textModel.get(i + 1).attributes;
+                        var line = textModel.get(i).attributes;
+                        line.remove(columnBegin, line.count - columnBegin);
+                        for(var j = 0; j < nextLine.count; j++){
+                            line.append(nextLine.get(j));
+                        }
                         textModel.remove(i + 1);//remove nextLine
                     }
                     else{//中间行
                         textModel.remove(i);
                     }
                 }
+                columnView.selectStart.y = columnView.selectEnd.y = columnView.currentIndex = rowBegin;
+                columnView.selectStart.x = columnView.selectEnd.x = columnBegin;
+                columnView.currentItem.children[0].currentIndex = columnBegin;
             }
+            cursor.fixPosition();
         }
         onEraseLine:{//删除一行末尾的换行符
-            var nowLine = textModel.at(row).attributes;
-            var nextLine = textModel.at(row + 1).attibutes;
-            nowLine.splice(nowLine.length - 1, 0, nextLine.splice(0, nextLine.length - 1));
+            var nextLine = textModel.get(row + 1).attributes;//下一行
+            var nowLine = textModel.get(row).attributes;//当前行
+            nowLine.remove(column);
+            for(var j = 0; j < nextLine.count; j++){
+                nowLine.append(nextLine.get(j));
+            }
             textModel.remove(row + 1);
+            columnView.selectStart.y = columnView.selectEnd.y = row;
+            columnView.selectStart.x = columnView.selectEnd.x = column;
+            columnView.currentIndex = row;
+            columnView.currentItem.children[0].currentIndex = column;
+            cursor.fixPosition();
         }
         /*--------高亮操作--------*/
         onHightlight:{
