@@ -10,7 +10,6 @@ ApplicationWindow {
     width: 1280
     height: 720
     title: qsTr("Scroll")
-    //TODO:maybe handle rezise event?
 
     FileDialog {
         id: fileDialog
@@ -169,10 +168,10 @@ ApplicationWindow {
                     text: "boom"
                     onClicked: {
                         //textModel.get(0).attributes.remove(0, 5);
-                        //insertCha(columnView._ep.x, columnView._ep.y, 't');
+                        //insertCha(columnView._ep.x, columnView._ep.y, '\n');
                         //insertStr(columnView._ep.x, columnView._ep.y, 'The quick brown fox jumps over the lazy dog\n The quick brown fox jump sover the lazy dog');
                         //eraseCha(columnView._ep.x, columnView._ep.y);
-                        eraseStr(columnView._sp.x, columnView._sp.y, columnView._ep.x, columnView._ep.y);
+                        //eraseStr(columnView._sp.x, columnView._sp.y, columnView._ep.x, columnView._ep.y);
                     }
 
                     signal insertCha(int column,int row,string cha);
@@ -317,7 +316,6 @@ ApplicationWindow {
         property int fontPixelSize: 16//font size
 
         /*定义每行的结构*/
-        //TODO:Animation
         Component{
             id:rowComp
             Rectangle{
@@ -571,7 +569,6 @@ ApplicationWindow {
         focus:true
         onTextEdited: {
             console.log(inputBus.text);
-            //TODO:insert
             var _sp = (columnView.selectStart.y > columnView.selectEnd.y ||
                        (columnView.selectStart.x > columnView.selectEnd.x &&
                         columnView.selectStart.y === columnView.selectEnd.y)) ?
@@ -584,7 +581,7 @@ ApplicationWindow {
         /*Handle shortcut event*/
         Shortcut{//backspace
             sequence: StandardKey.Backspace
-            onActivated: {
+            onActivated: {//TODO:修正删除位置
                 if(columnView.selectStart === columnView.selectEnd){
                     app.currentFile().erase(columnView.selectEnd.y, columnView.selectEnd.x);
                 }
@@ -592,7 +589,6 @@ ApplicationWindow {
                     var _sp = columnView.getTruthPoint()["_sp"];
                     var _ep = columnView.getTruthPoint()["_ep"];
                     app.currentFile().erase(_sp.y, _sp.x, _ep.y, _ep.x);
-                    //TODO:删除的是终点序号之前or包括终点序号？（应该是之前）
                 }
             }
         }
@@ -699,9 +695,8 @@ ApplicationWindow {
             if(cha !== '\n'){
                 textModel.get(row).attributes.insert(column, {description: cha});
                 //修复插入后光标位置
-                columnView.selectStart.x++;
-                columnView.selectEnd.x++;
-                columnView.currentItem.children[0].currentIndex++;
+                columnView.selectEnd.x = columnView.selectStart.x = column + 1;
+                columnView.currentItem.children[0].currentIndex = column + 1;
                 cursor.fixPosition();
             }
             else{
@@ -714,9 +709,8 @@ ApplicationWindow {
                 }
 
                 columnView.selectStart.x = columnView.selectEnd.x = 0;
-                columnView.selectStart.y++;
-                columnView.selectEnd.y++;
-                columnView.currentIndex++;
+                columnView.selectEnd.y = columnView.selectStart.y = row + 1;
+                columnView.currentIndex = row + 1;
                 cursor.fixPosition();
             }
         }
@@ -726,9 +720,8 @@ ApplicationWindow {
             for(var i = 0; i < str.length; i++){
                 if(str[i] !== '\n'){
                     textModel.get(_row).attributes.insert(_column, {description: str[i]});
-                    columnView.selectStart.x++;
-                    columnView.selectEnd.x++;
-                    columnView.currentItem.children[0].currentIndex++;
+                    columnView.selectEnd.x = columnView.selectStart.x = _column + 1;
+                    columnView.currentItem.children[0].currentIndex = _column + 1;
                     _column++;
                 }
                 else{
@@ -744,9 +737,8 @@ ApplicationWindow {
                         preLine.remove(j);
                     }
                     columnView.selectStart.x = columnView.selectEnd.x = 0;
-                    columnView.selectStart.y++;
-                    columnView.selectEnd.y++;
-                    columnView.currentIndex++;
+                    columnView.selectEnd.y = columnView.selectStart.y = _row + 1;
+                    columnView.currentIndex = _row + 1;
                     _row++;
                     _column = 0;
                 }
