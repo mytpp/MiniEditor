@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <QString>
+#include<QDebug>
 
 class AbstractVisitor;
 
@@ -13,10 +14,10 @@ public:
     //this constructor may be called when a file is being loaded
     TextRow(QString text);
 
-    QChar& operator[](int position);
+    QChar operator[](int position)const;
 
-    //int size();
-    //int capacity();//only for debug
+    int size() const;
+    int capacity() const;  //only for debug
 
     //make sure the capacity of row is a multiple of 50
     //consider its member function vector::reserve()
