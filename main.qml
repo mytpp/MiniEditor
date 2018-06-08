@@ -654,6 +654,10 @@ ApplicationWindow {
             app.currentFile().insert(_sp.y, _sp.x, inputBus.text);
             inputBus.clear();
         }
+        onAccepted: {
+            console.log('enter');
+            app.currentFile().insert(columnView._ep.y, columnView._ep.x, '\n');
+        }
 
         //Keys.priority: Keys.AfterItem
         Keys.onPressed: {
@@ -677,9 +681,10 @@ ApplicationWindow {
                     app.currentFile().erase(_sp.y, _sp.x, _ep.y, _ep.x);
                 }
             }
-            else if(event.key == Qt.Key_Enter){
-                app.currentFile().insert(_sp.y, _sp.x, '\n');
-            }
+//            else if(event.key == Qt.Key_Enter){
+//                console.log('enter');
+//                app.currentFile().insert(_sp.y, _sp.x, '\n');
+//            }
         }
 
         /*Handle shortcut event*/
