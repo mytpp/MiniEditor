@@ -82,6 +82,7 @@ void TextFile::display()
 
 bool TextFile::save()
 {
+    qDebug()<<"save?";
     if(url.isEmpty()) //if the file has not been stored, call saveAs()
         return saveAs();
     else
@@ -123,9 +124,9 @@ bool TextFile::canClose()
                 QMessageBox::warning(nullptr, tr("MiniWord"),
                                      tr("The file has been modified. Save changes?"),
                                      QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
-        if (pressed = QMessageBox::Save)
+        if (pressed == QMessageBox::Save){
             return save();
-        else if (pressed = QMessageBox::Cancel)
+        }else if (pressed == QMessageBox::Cancel)
             return false;
         return true;     //refuse to save (Discard)
     } else {
