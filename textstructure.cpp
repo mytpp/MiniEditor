@@ -79,8 +79,8 @@ bool TextStructure::insert(std::pair<int, int> position, QChar character)
 
     if(character=='\n')
     {
-        QString rest = data(position, {position.first, i->size()});
-        i->erase(position.second, i->size());
+        QString rest = data(position, {position.first, i->size()-1});
+        i->erase(position.second, i->size()-1);
         text.emplace(++i, rest);
     }
     else
