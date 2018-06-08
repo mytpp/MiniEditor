@@ -132,7 +132,7 @@ ApplicationWindow {
             anchors.verticalCenter: parent.verticalCenter
             Row {
                 ToolButton {//open file
-                    text: "\uf07c"
+                    text: "\uf07c  打开"
                     font.family: "FontAwesome"
                     onClicked: {
                         fileDialog.open();
@@ -142,21 +142,21 @@ ApplicationWindow {
             }
             Row {
                 ToolButton {//save
-                    text: "\uf0c7"
+                    text: "\uf0c7 保存"
                     font.family: "FontAwesome"
                     onClicked: {
                         app.save();
                     }
                 }
                 ToolButton {//redo
-                    text: "\uf01e"
+                    text: "\uf01e 重做"
                     font.family: "FontAwesome"
                     onClicked: {
                         app.currentFile().redo();
                     }
                 }
                 ToolButton {//undo
-                    text: "\uf0e2"
+                    text: "\uf0e2 撤销"
                     font.family: "FontAwesome"
                     onClicked: {
                         app.currentFile().undo();
@@ -182,7 +182,7 @@ ApplicationWindow {
             }
             Row{
                 ToolButton {//menu
-                    text: "\uf0c9"
+                    text: "\uf0c9 菜单"
                     font.family: "FontAwesome"
                     onClicked: {
                         contextMenu.popup()
@@ -210,15 +210,36 @@ ApplicationWindow {
                             }
                             Action{
                                 text: "保存"
+                                onTriggered: {
+                                    app.save();
+                                }
+                            }
+                            Action{
+                                text: "保存所有"
+                                onTriggered: {
+                                    app.saveAll();
+                                }
                             }
                             Action{
                                 text: "关闭"
+                                onTriggered: {
+                                    app.close();
+                                }
                             }
                         }
-                        MenuSeparator { }
-                        Action { text: "Cut" }
-                        Action { text: "Copy" }
-                        Action { text: "Paste" }
+                        MenuSeparator {}
+                        Action {
+                            text: "复制"
+                            onTriggered: {
+                                copyCommand.activated();
+                            }
+                        }
+                        Action {
+                            text: "粘贴"
+                            onTriggered: {
+                                pasteCommand.activated();
+                            }
+                        }
                     }
                 }
             }
@@ -634,15 +655,16 @@ ApplicationWindow {
             inputBus.clear();
         }
 
-        Keys.priority: Keys.AfterItem
+        //Keys.priority: Keys.AfterItem
         Keys.onPressed: {
             if(event.key == Qt.Key_Delete){
                 app.currentFile().erase(columnView.selectEnd.y, columnView.selectEnd.x);
             }
             else if(event.key == Qt.Key_Backspace){
+                console.log('back');
                 if(columnView.selectStart === columnView.selectEnd){
                     if(columnView.selectEnd.x != 0){
-                        app.currentFile().erase(columnView.selectEnd.y, columnView.selectEnd.x);
+                        app.currentFile().erase(columnView.selectEnd.y, columnView.selectEnd.x - 1);
                     }
                     else{
                         var endPos = textModel.get(columnView.selectEnd.y - 1).children[0].count - 1;
@@ -655,6 +677,9 @@ ApplicationWindow {
                     app.currentFile().erase(_sp.y, _sp.x, _ep.y, _ep.x);
                 }
             }
+            else if(event.key == Qt.Key_Enter){
+                app.currentFile().insert(_sp.y, _sp.x, '\n');
+            }
         }
 
         /*Handle shortcut event*/
@@ -665,6 +690,7 @@ ApplicationWindow {
             }
         }
         Shortcut{//copy
+            id:copyCommand
             sequence: "Ctrl+C"
             onActivated: {
                 var _sp = columnView.getTruthPoint()["_sp"];
@@ -673,6 +699,7 @@ ApplicationWindow {
             }
         }
         Shortcut{//paste
+            id:pasteCommand
             sequence: "Ctrl+V"
             onActivated: {
                 var _ep = columnView.getTruthPoint()["_ep"];
@@ -717,6 +744,7 @@ ApplicationWindow {
             }
             openFiles.append({name: name});
             openFileTabs.currentIndex = openFiles.count - 1;
+            currentFile.target = app.currentFile();
         }
     }
     Connections{
@@ -779,9 +807,10 @@ ApplicationWindow {
             cursor.fixPosition();
         }
         onEraseCha:{//删除字符
-            var nextLine = textModel.get(row + 1).attributes;//下一行
             var nowLine = textModel.get(row).attributes;//当前行
             if(column == nowLine.count - 1){//删除该行末尾换行符
+                if(row == textModel.count - 1) return;//不允许删除最末位换行符
+                var nextLine = textModel.get(row + 1).attributes;//下一行
                 nowLine.remove(column);
                 for(var j = 0; j < nextLine.count; j++){
                     nowLine.append(nextLine.get(j));
