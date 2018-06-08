@@ -640,6 +640,7 @@ ApplicationWindow {
                 app.currentFile().erase(columnView.selectEnd.y, columnView.selectEnd.x);
             }
             else if(event.key == Qt.Key_Backspace){
+                console.log('erase');
                 if(columnView.selectStart === columnView.selectEnd){
                     if(columnView.selectEnd.x != 0){
                         app.currentFile().erase(columnView.selectEnd.y, columnView.selectEnd.x);
@@ -717,6 +718,7 @@ ApplicationWindow {
             }
             openFiles.append({name: name});
             openFileTabs.currentIndex = openFiles.count - 1;
+            currentFile.target = app.currentFile();
         }
     }
     Connections{
@@ -748,6 +750,7 @@ ApplicationWindow {
             }
         }
         onInsertStr:{//插入字符串
+            console.log("ins str");
             var _row = row;
             var _column = column;
             for(var i = 0; i < str.length; i++){

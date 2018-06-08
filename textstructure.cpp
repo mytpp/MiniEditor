@@ -4,7 +4,7 @@
 
 TextStructure::TextStructure()
 {
-    text.emplace_back();
+    text.push_back(TextRow());
 }
 
 /*------返回position位置上的QChar------*/
@@ -91,6 +91,7 @@ bool TextStructure::insert(std::pair<int, int> position, QChar character)
 
 bool TextStructure::insert(std::pair<int, int> position, QString newString)
 {
+    qDebug()<<"txt ins";
     int length=newString.size();
     int text_size=text.size();
     if(position.first>=text_size)
@@ -101,6 +102,7 @@ bool TextStructure::insert(std::pair<int, int> position, QString newString)
     if( position.second>=i->size() )
         qDebug()<<position.second;
 
+    qDebug()<<position.first<<"  "<<position.second;
     int j;
     QString slice;
     for(j=0;j<length;j++){
