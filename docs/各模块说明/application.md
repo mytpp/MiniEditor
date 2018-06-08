@@ -28,9 +28,9 @@
 
 
 ## Private Functions
-| 类型 |声明|
-|-|-|
-void | setCurrentFile(std::list<TextFile>::iterator index)
+| 索引 | 类型 |声明|
+-|-|-|
+10 |void | setCurrentFile(std::list<TextFile>::iterator index)
 
 
 ## Signal
@@ -99,10 +99,12 @@ QML中需要通过它返回的指针建立起对当前文件的信号监听，�
 设置当前文件标志`current`为`openFiles`中第`index`个元素（文件）。  
 此函数是留给QML的接口，QML中可以向C++中传 int 型参数，实际完成工作的是该函数接受迭代器参数的重载版本。  
 
-[private] `void setCurrentFile(std::list<TextFile>::iterator index)`  
+10. [private] `void setCurrentFile(std::list<TextFile>::iterator index)`  
 设置当前文件标志`current`为`openFiles`中第`index`个文件。  
 在设置完成之后会调用当前文件的`display()`函数，将当前文件的内容展示在图形界面上。
 
-[signal] `void fileLoaded(QString name)`  
+
+## Signal Documentation
+`void fileLoaded(QString name)`  
 表示文件载入完毕的信号。QML接受到该信号后会将当前文件名`name`展示在tag上（空文件文件名为"Untitled"）。并且清除原来展示在界面上的文件内容，为展示新文件的内容做准备。
 

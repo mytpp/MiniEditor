@@ -152,7 +152,7 @@ void TextFile::addCommand(std::unique_ptr<EditCommand> &&command)
 
 void TextFile::highlightAll(int length)
 {
-    std::vector<std::pair<int,int>>& result = searchVisitor->getResult();
+    auto& result = searchVisitor->getResult();
     for(const auto &e: result) {
         emit highlight(e.first, e.second, length);
     }
@@ -202,7 +202,7 @@ void TextFile::showNext()
 
 void TextFile::replaceAll(QString newString)
 {
-    if((searchVisitor->getResult()).empty())
+    if(searchVisitor->noResult() || searchVisitor->getFormat() == newString)
         return;
     auto replaceCommand = std::make_unique<ReplaceCommand>(
                     std::make_unique<SearchVisitor>(*searchVisitor), //synthesized copy constructor will work
@@ -223,6 +223,7 @@ void TextFile::replaceAll(QString newString)
     }
 
     emit highlightAll(newString.size());
+    result.clear();
 }
 
 void TextFile::replaceCurrent(QString newString)
@@ -232,16 +233,17 @@ void TextFile::replaceCurrent(QString newString)
     int row = currentSearchResult->first;
     int column = currentSearchResult->second;
     int length = (searchVisitor->getFormat()).size();
+    auto &result = searchVisitor->getResult();
 
     eraseStr(row, column, row, column+length);
     insert(row, column, newString);
 
     //erase the replaced item from search result
-    auto iter = (searchVisitor->getResult()).erase(currentSearchResult);
+    auto iter = result.erase(currentSearchResult);
+    currentSearchResult = iter - 1;
 
     //adjust the positions in search result which is in the same line as 'currentSearchResult'
-    auto &result = searchVisitor->getResult();
-    while(iter!=result.end() && iter->first == row)
+    while(iter != result.end() && iter->first == row)
         iter->second += newString.size() - length;
 
     emit highlightCurrent(row, column, newString.size());

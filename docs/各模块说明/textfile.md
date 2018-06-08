@@ -14,10 +14,10 @@ private | QUrl | url;
 private | QString | name
 private | std::shared_ptr\<TextStructure> | text;
 private | std::fstream | file;
-private | std::shared_ptr<SearchVisitor> | searchVisitor 
+private | std::unique_ptr<SearchVisitor> | searchVisitor 
 private | std::vector<std::pair<int,int>>::iterator | currentSearchResult
-private | std::list\<EditCommand*> | historyList;
-private | std::list\<std::shared_ptr\<EditCommand>>::iterator | nextCommand;
+private | std::list\<std::unique_ptr\<EditCommand>> | historyList;
+private | std::list\<std::unique_ptr\<EditCommand>>::iterator | nextCommand;
 
 
 ## Public Functions
@@ -30,29 +30,30 @@ private | std::list\<std::shared_ptr\<EditCommand>>::iterator | nextCommand;
 5|bool | save()
 6|bool | saveAs()
 7|bool | canClose()
-8|const QString | fileName() const;
+8|const QString | fileName() const
 9|Q_INVOKABLE void | cut(int rowBegin, int colBegin, int rowEnd, int colEnd)
 10|Q_INVOKABLE void | copy(int rowBegin, int colBegin, int rowEnd, int colEnd)
 11|Q_INVOKABLE void | paste(int row, int column)
 12|Q_INVOKABLE bool | search(QString format, Qt::CaseSensitivity = Qt::CaseSensitive);
 13|Q_INVOKABLE void | showPrevious()
 14|Q_INVOKABLE void | showNext()
-15|Q_INVOKABLE void | replaceAll(QString newString);
-16|Q_INVOKABLE void | replaceCurrent(QString newString);
+15|Q_INVOKABLE void | replaceAll(QString newString)
+16|Q_INVOKABLE void | replaceCurrent(QString newString)
 17|Q_INVOKABLE void | insert(int row, int column, QChar character)
 18|Q_INVOKABLE void | insert(int row, int column, QString newString)
 19|Q_INVOKABLE void | erase(int row, int column)
 20|Q_INVOKABLE void | erase(int rowBegin, int colBegin, int rowEnd, int colEnd)
 21|Q_INVOKABLE void | undo()
 22|Q_INVOKABLE void | redo()
+23||~TextFile()
 
 
 ## Private Functions
-| 类型 |声明|
-|-|-|
-bool | saveFile(QUrl path)
-void | addCommand(std::shared_ptr<EditCommand> command)
-void | highlightAll(int length = 1);
+|索引| 类型 |声明|
+-|-|-|
+24 | bool | saveFile(QUrl path)
+25 | void | addCommand(std::unique_ptr<EditCommand> &&command)
+26 | void | highlightAll(int length = 1)
 
 
 ## Signals
@@ -134,7 +135,7 @@ TextFile中维护一个command的列表（historyList，使用STL中的list封�
 url对应地址文件的文件流。  
 在接受一个QUrl参数的构造函数中会根据传入的参数讲`file`关联到相应的文件，在读取完毕后会断开该文件流和硬盘上文件的链接。在保存文件（`saveFile(QUrl path)`）的操作中`file`会根据`path`重新建立与硬盘上文件的关联，并通过`SaveVisitor`将`text`中的内容保存到硬盘上，此操作结束后，会再次断开硬盘上文件的关联。
 
-`searchVisitor : std::shared_ptr<SearchVisitor>`   
+`searchVisitor : std::unique_ptr<SearchVisitor>`   
 对当前文件调用`search()`后得到的搜索结果。  
 `search()`操作会将搜索结果放进该成员中，然后`showPrevious()`或`showNext()`函数可以根据`searchVisitor`中保存的搜索结果将高亮区域定位到前一个或后一个与搜索格式串相匹配的字符处。
 
@@ -142,12 +143,12 @@ url对应地址文件的文件流。
 指向当前搜索结果中被高亮条目的的迭代器。  
 用于辅助完成`showPrevious()`和`showNext()`函数。若搜索结果不为空，则`showPrevious()`会高亮`currentSearchResult`前一个搜索结果条目，`showNext()`会高亮`currentSearchResult`后一个搜索结果条目。
 
-`historyList : std::list<std::shared_ptr<EditCommand>>`  
+`historyList : std::list<std::unique_ptr<EditCommand>>`  
 在当前文件上执行过的“写操作”的历史列表。  
 用于支持撤销/重做操作。在`addCommand()`中会将一条EditCommand压入历史列表（在此之前会清空`historyList`中`nextCommand`所指向的命令之后的所有命令，包括`nextCommand`指向的命令）。  
 更详细说明见Detailed Description部分中“撤销&重做（undo&redo）”一节。
 
-`nextCommand : std::list<std::shared_ptr<EditCommand>>::iterator`  
+`nextCommand : std::list<std::unique_ptr<EditCommand>>::iterator`  
 指向下一次调用`redo()`操作将要执行的命令。  
 这是一个`historyList`上的迭代器。在`redo()`操作中会将其加一，在`undo()`操作中会将其减一。
 
@@ -225,34 +226,85 @@ url对应地址文件的文件流。
 
 15. [public] `void TextFile::replaceAll(QString newString)`  
 用新字符串`newString`替换文本中所有的搜索结果。  
-如果搜索结果为空，什么都不会做。否则根据搜索结果和`newString`构造出一个`ReplaceCommand`，利用它执行替换操作
+如果搜索结果为空或者被替换的串与新串相同，什么都不会做。否则根据搜索结果和`newString`构造出一个`ReplaceCommand`，利用它执行替换操作。之后将该操作加入历史列表里。  
+之后会根据新串和老串的长度差调整搜索结果的位置，借此高亮所有替换得到的新的字符串。最后会清空搜做结果列表，表示没有字符串匹配原来的搜索结果。
 
+16. [public] `void TextFile::replaceCurrent(QString newString)`  
+用新字符串`newString`替换文本中当前特殊高亮的搜索结果字符串（被`currentSearchResult`标识）。  
+如果搜索结果为空或者被替换的串与新串相同，什么都不会做。否则擦除`currentSearchResult`指示的字符串并用`newString`代替。之后将该操作加入历史列表里。  
+替换结束后，需要将`currentSearchResult`从结果列表里删除，并调整`currentSearchResult`位置使其指向下一个搜索结果字符串的位置。还要将被替换的字符串的同行且位于其后面的搜索结果字符串的位置相应调整，使其加上“新串长度与老串长度的差”。  
+最后高亮替换后的新串。
 
-16. [public] `void TextFile::replaceCurrent(QString newString)`
+17. [public] `void TextFile::insert(int row, int column, QChar character)`  
+在第`row`行`column`列插入字符`character`。  
+在该函数内部构造一个`InsertCommand`对象，并使用它来进行实际的插入操作。插入完成后将该操作压入历史列表里。 
 
-[public] `void TextFile::insert(int row, int column, QChar character)`
+18. [public] `void TextFile::insert(int row, int column, QString newString)`  
+在第`row`行`column`列插入字符串`newString`。  
+在该函数内部构造一个`InsertCommand`对象，并使用它来进行实际的插入操作。插入完成后将该操作压入历史列表里。 
 
-[public] `void TextFile::insert(int row, int column, QString newString)`
+19. [public] `void TextFile::erase(int row, int column)`  
+删除第`row`行`column`列的字符。  
+在该函数内部构造一个`EraseCommand`对象，并使用它来进行实际的删除操作。插入完成后将该操作压入历史列表里。
 
-[public] `void TextFile::erase(int row, int column)`
+20. [public] `void TextFile::erase(int rowBegin, int colBegin, int rowEnd, int colEnd)`  
+删除第`rowBegin`行`colBegin`列到`rowEnd`行`colEnd`列之间的所有字符。   
+在该函数内部构造一个`EraseCommand`对象，并使用它来进行实际的删除操作。插入完成后将该操作压入历史列表里。
 
-[public] `void TextFile::erase(int rowBegin, int colBegin, int rowEnd, int colEnd)`
+21. [public] `void TextFile::undo()`  
+撤销操作。  
+只要列表不空，则将`nextCommand`向后推一个节点，执行该节点的`redo()`操作。  
+更详细说明见Detailed Description部分中“撤销&重做（undo&redo）”一节。
 
-[public] `void TextFile::undo()`
+22. [public] `void TextFile::redo()`  
+重做操作。  
+只要`nextCommand`指向的不是历史列表的尾后位置，则执行该节点的`redo()`操作，然后将`nextCommand`向后推一个节点。   
+更详细说明见Detailed Description部分中“撤销&重做（undo&redo）”一节。
 
-[public] `void TextFile::redo()`
+23. [public] `~TextFile()`  
+析构函数。  
+必须将析构函数定义在类外。因为默认生成的i析构函数使内联的，而在其内联定义处`SearchVisitor`和`EditCommand`的定义还不可见，默认生成的析构函数内部无法生成这些类型的`unique_ptr`的析构函数，必然导致编译失败。但在TextFile类的.cpp文件里`SearchVisitor`和`EditCommand`都变成了完全类型（定义可见），此时再定义析构函数是没有我呢提的。采用的依旧是默认版本的析构函数，与默认生成的析构函数相比，我们只是改变了它定义的位置。
 
-[private]  `bool TextFile::saveFile(QUrl path)`  
+24. [private]  `bool TextFile::saveFile(QUrl path)`  
 向`path`指定的路径保存`text`(`std::shared_ptr<TextStructure>`)中存储的文本内容。  
 将`file`关联到`path`指定的路径，如果关联成功，则用一个SaveVisitor来遍历`text`实现在指定路径上的文件保存。之后会断开`file`与`path`的关联。若保存成功，更新文件路径`url`和文件名`name`。 若保存失败，弹窗警告。 
 返回值表示是否成功保存文件。  
 其他相关说明见Detailed Description部分中“文件保存与关闭”一节。
 
-[private] `void TextFile::addCommand(std::shared_ptr<EditCommand> command)`  
+25. [private] `void TextFile::addCommand(std::shared_ptr<EditCommand> command)`  
 向`historyList`中添加一条新命令。  
 在压入新命令前，会将`nextCommand`（included）到`historyList`末尾的所有命令清除掉。压入新命令后会将`nextCommand`置为``historyList`的尾后迭代器。最后将“文件是否已修改”的标记为（`isModified`）置为`true`，表示文件已被修改过。  
 更多相关说明见Detailed Description部分中“撤销&重做（undo&redo）”一节。
 
-[private] `void highlightAll(int length = 1);`
+26. [private] `void highlightAll(int length = 1)`  
+遍历当前所有搜索结果，发出高亮每个搜索结果中的字符串的信号。  
 
+
+## Signal Documentation
+1. insertCha(int row, int column, QChar cha)  
+在第`row`行`column`列插入字符`cha`的信号。
+
+2. insertStr(int row, int column, QString str)  
+在第`row`行`column`列插入字符串`str`的信号。
+
+3. append(QChar cha)  
+在文本文档末尾插入一个字符`cha`的信号。
+
+4. eraseCha(int row, int column)  
+删除第`row`行`column`列的字符的信号。
+
+5. eraseStr(int rowBegin, int colBegin, int rowEnd, int colEnd)  
+删除从`rowBegin`行`colBegin`列到`rowEnd`行`colEnd`列之间的字符的信号。包含起始位置，不包含终止位置。
+
+6. eraseLine(int row)  
+删除第`row`行的信号
+
+7. highlight(int row, int column, int length = 1)  
+高亮第`row`行`column`列的字符的信号，表示搜索结果。
+
+8. highlightCurrent(int row, int column, int length = 1)  
+高亮标识当前搜索结果的信号，与`highlight()`信号采用不同的颜色高亮以作区分。
+
+9. void destroyed(QObject *obj = Q_NULLPTR)
+表示当前文件被销毁的信号，用于通知QML关闭当前文件的显示。该信号从QObject继承而来。
 
