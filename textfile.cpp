@@ -36,13 +36,14 @@ TextFile::TextFile(QUrl address)
       url(address),
       name(url.fileName()),
       text(new TextStructure),
-      file(address.url().toLocal8Bit().data()),
+      file(address.url().toLocal8Bit().data()+8),
       searchVisitor(),
       currentSearchResult(),
       historyList(),
       nextCommand(historyList.end())
 {
-    qDebug()<<address;
+    qDebug()<<"ff"<<address;
+    qDebug()<<address.url().toLocal8Bit().data()+8;
     if(file) {
         std::string line;
         QString line_16bit;
