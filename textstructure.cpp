@@ -201,9 +201,8 @@ bool TextStructure::erase(std::pair<int, int> begin, std::pair<int, int> end)
 bool TextStructure::traverse(AbstractVisitor &visitor)
 {
     for(auto i=text.begin(); i!=text.end(); i++)
-        for(int j=0;j<i->size();j++)
-           if(!i->traverse(visitor))
-                return false;
+        if(!i->traverse(visitor))
+            return false;
 
     return true;
 
