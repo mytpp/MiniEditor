@@ -51,7 +51,7 @@ ApplicationWindow {
             model: openFiles
 
             highlight: Rectangle{
-                //anchors.fill: parent
+                anchors.fill: parent
                 color: 'white'
             }
 
@@ -228,8 +228,10 @@ ApplicationWindow {
                 clip: true
                 font.pixelSize: 20
 
-                onEditingFinished: {
-                    app.currentFile().search(searchInput.text);
+                Keys.onPressed: {
+                    if(event.key == Qt.Key_Enter){
+                        app.currentFile().search(searchInput.text);
+                    }
                 }
             }
             Button{
@@ -262,9 +264,10 @@ ApplicationWindow {
                 text: "\uf00d"
 
                 onClicked: {
+                    searchInput.clear();
                     searchBar._enable = false;
                     inputBus.focus = true;
-                    searchInput.clear();
+
                 }
             }
         }
@@ -577,13 +580,19 @@ ApplicationWindow {
             app.currentFile().insert(_sp.y, _sp.x, inputBus.text);
             inputBus.clear();
         }
-
-        /*Handle shortcut event*/
-        Shortcut{//backspace
-            sequence: StandardKey.Backspace
-            onActivated: {//TODO:修正删除位置
+        Keys.onPressed: {
+            if(event.key == Qt.Key_Delete){
+                app.currentFile().erase(columnView.selectEnd.y, columnView.selectEnd.x);
+            }
+            else if(event.key == Qt.Key_Backspace){
                 if(columnView.selectStart === columnView.selectEnd){
-                    app.currentFile().erase(columnView.selectEnd.y, columnView.selectEnd.x);
+                    if(columnView.selectEnd.x != 0){
+                        app.currentFile().erase(columnView.selectEnd.y, columnView.selectEnd.x);
+                    }
+                    else{
+                        var endPos = textModel.get(columnView.selectEnd.y - 1).children[0].count - 1;
+                        app.currentFile().erase(columnView.selectEnd.y - 1, endPos);
+                    }
                 }
                 else{
                     var _sp = columnView.getTruthPoint()["_sp"];
@@ -592,6 +601,8 @@ ApplicationWindow {
                 }
             }
         }
+
+        /*Handle shortcut event*/
         Shortcut{//search
             sequence: "Ctrl+F"
             onActivated: {
