@@ -4,7 +4,7 @@
 
 TextStructure::TextStructure()
 {
-
+    text.emplace_back();
 }
 
 /*------返回position位置上的QChar------*/
@@ -54,7 +54,7 @@ const QString TextStructure::data(std::pair<int, int> begin, std::pair<int, int>
              j=0;
          for(;j<i->size();j++)
          {
-             append_char = data(position);
+             append_char = (*i)[j];
              result.append(append_char);
          }
     }
@@ -79,11 +79,12 @@ bool TextStructure::insert(std::pair<int, int> position, QChar character)
 
     if(character=='\n')
     {
-        TextRow insert_row=TextRow();
-        text.insert(i,insert_row);
+        QString rest = data(position, {position.first, i->size()});
+        i->erase(position.second, i->size());
+        text.emplace(++i, rest);
     }
     else
-       (*i).insert(position.second, character);
+       i->insert(position.second, character);
 
     return true;
 }
@@ -101,8 +102,22 @@ bool TextStructure::insert(std::pair<int, int> position, QString newString)
         qDebug()<<position.second;
 
     int j;
-    for(j=0;j<length;j++)
-        TextStructure::insert(position,newString[j]);
+    QString slice;
+    for(j=0;j<length;j++){
+        if(newString[j]=='\n'){
+            QString rest = data(position, {position.first, i->size()});
+            i->erase(position.second, i->size());
+            i->insert(position.second, slice);
+            text.emplace(++i, rest);
+            position.second = 0;
+            slice.clear();
+        } else {
+            slice.append(newString[j]);
+        }
+    }
+        //TextStructure::insert(position,newString[j]);
+    if(!slice.isEmpty())
+        i->insert(position.second, slice);
 
     return true;
 }
@@ -113,15 +128,14 @@ bool TextStructure::erase(std::pair<int, int> position)
     if(position.first>=text_size)
         qDebug()<<position.first;
     auto i = text.begin();
-    auto t = text.begin();
-    auto j = text.end();
     advance(i,position.first);
-    advance(t,position.first);
+    auto t = i;
+    auto j = text.end();
 
     if( position.second>=i->size() )
         qDebug()<<position.second;
 
-    QChar a=TextStructure::data(position);
+    QChar a=(*i)[position.second];
 
     i->erase(position.second);
     if(a=='\n')   //每行以换行符结尾
@@ -130,9 +144,9 @@ bool TextStructure::erase(std::pair<int, int> position)
        if(t!=j)
        {
           QString merge_string="";
-          for(int k=0;k<t->size();i++)
-              merge_string.append(t->operator [](k));
-          TextStructure::insert(position, merge_string);
+          for(int k=0;k<t->size();k++)
+              merge_string.append((*t)[k]);
+          i->insert(position.second, merge_string);
           text.erase(t);
        }
     }
@@ -143,23 +157,41 @@ bool TextStructure::erase(std::pair<int, int> position)
 bool TextStructure::erase(std::pair<int, int> begin, std::pair<int, int> end)
 {
 
-    std::pair<int, int>current_position;
+    //std::pair<int, int>current_position;
     auto m =text.begin();
+    auto n =text.begin();
     advance(m,begin.first);
+    advance(n, end.first);
 
-    for(current_position.first=begin.first;current_position.first<=end.first;current_position.first++)
-    {
-        if(current_position.first==begin.first)
-        {
-            for(current_position.second=begin.second;current_position.second<m->size();current_position.second++)
-                erase(current_position);
-        }
-        else
-        {
-            for(current_position.second=0;current_position.second<m->size();current_position.second++)
-                erase(current_position);
-        }
+    if(m == n) {
+        (*m).erase(begin.second, end.second);
+        return true;
     }
+
+//    for(current_position.first=begin.first; current_position.first<=end.first; current_position.first++)
+//    {
+//        if(current_position.first==begin.first)
+//        {
+//            for(current_position.second=begin.second;current_position.second<m->size();current_position.second++)
+//                erase(current_position);
+//        }
+//        else
+//        {
+//            for(current_position.second=0;current_position.second<m->size();current_position.second++)
+//                erase(current_position);
+//        }
+//    }
+    m = text.erase(++m, n);
+    n = m--;
+    m->erase(begin.second, m->size());
+    n->erase(0, end.second);
+
+    QString merge_string="";
+    for(int k=0;k<n->size();k++)
+        merge_string.append((*n)[k]);
+    m->insert(begin.second, merge_string);
+    text.erase(n);
+
     return true;
 }
 
