@@ -7,6 +7,7 @@
 TextRow::TextRow()
 {
     row.push_back(QChar('\n'));
+    row.reserve(50);
 }
 
 
@@ -63,21 +64,17 @@ bool TextRow::insert(int position, QString str)
     if(  position > current_size )
         return false;                           //considering the position is undesirable
 
+//    qDebug()<<"length "<<length;
+//    qDebug()<<" before if"<<current_size<<"  "<<current_capacity;
     if( current_size+length >= current_capacity )
     {    
+        qDebug()<<"in if"<<current_size<<"  "<<current_capacity;
         int n=length/50;
         if( length%50!=0 )
               n = n+1;
         row.reserve(current_capacity+n*50);      //considering the space is not enough
     }
-
-//    QChar* data=str.data();             //inserting the whole string one by one
-
-//    auto j = row.begin();
-//    advance(j,position);
-
-//    for(int i=0;i<length;i++,j++)
-//        row.insert(j,data[i]);
+    row.resize(current_size+length);
 
     //shift QChar in the 'row' whose position is after 'pos' backwoard by 'length' characters
     for(int i=current_size+length-1; i>position+length-1; --i)
@@ -86,6 +83,11 @@ bool TextRow::insert(int position, QString str)
     for(int i=position; i<position+length; ++i)
         row[i] = str[i-position];
 
+    //qDebug()<<"size:"<<row.size()<<" capacity: "<<row.capacity();
+
+    qDebug()<<"row:";
+    for(auto e: row)
+        qDebug()<<e;
     return true;
 }
 

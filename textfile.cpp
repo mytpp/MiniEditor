@@ -12,6 +12,7 @@
 #include "Command/erasecommand.h"
 #include "Command/insertcommand.h"
 #include "Command/replacecommand.h"
+#include <QDebug>
 
 
 TextFile::TextFile()
@@ -270,6 +271,7 @@ void TextFile::paste(int row, int column)
 
 void TextFile::insert(int row, int column, QChar character)
 {
+    qDebug()<<"ins cha";
     auto insertCommand = std::make_unique<InsertCommand>(
                std::make_pair(row, column), character, text, this);
     (*insertCommand)();
@@ -278,6 +280,7 @@ void TextFile::insert(int row, int column, QChar character)
 
 void TextFile::insert(int row, int column, QString newString)
 {
+    qDebug()<<"ins str";
     auto insertCommand = std::make_unique<InsertCommand>(
                std::make_pair(row, column), newString, text, this);
     (*insertCommand)();
