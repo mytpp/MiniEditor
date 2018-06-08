@@ -16,7 +16,7 @@ ApplicationWindow {
         title: "Open"
         nameFilters: [ "TextFiles (*.txt)","All Files (*)" ]
         modality: Qt.WindowModal
-        selectExisting: false //allow to create new(maybe?)
+        //selectExisting: false //allow to create new(maybe?)
         onAccepted: {
             console.log("open file:" + fileDialog.fileUrl);
             app.addFile(fileDialog.fileUrl);
