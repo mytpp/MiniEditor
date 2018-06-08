@@ -30,9 +30,9 @@ ApplicationWindow {
         color: '#2983bb'
         ListModel{
             id:openFiles
-            ListElement{
-                name:'社会主义从空想到科学的发展'
-            }
+//            ListElement{
+//                name:'社会主义从空想到科学的发展'
+//            }
         }
 
         ListView{
@@ -178,6 +178,43 @@ ApplicationWindow {
                     signal insertStr(int column, int row, string str);
                     signal eraseCha(int column, int row);
                     signal eraseStr(int columnBegin, int rowBegin, int columnEnd, int rowEnd);
+                }
+            }
+            Row{
+                ToolButton {//menu
+                    text: "\uf0c9"
+                    font.family: "FontAwesome"
+                    onClicked: {
+                        contextMenu.popup()
+                    }
+
+                    Menu {
+                        id: contextMenu
+                        Menu{
+                            title: "文件"
+                            Action{
+                                text: "新建"
+                                onTriggered:  {
+                                    console.log('trig');
+                                    app.addFile();
+                                }
+                            }
+
+                            Action{
+                                text: "打开"
+                            }
+                            Action{
+                                text: "保存"
+                            }
+                            Action{
+                                text: "关闭"
+                            }
+                        }
+                        MenuSeparator { }
+                        Action { text: "Cut" }
+                        Action { text: "Copy" }
+                        Action { text: "Paste" }
+                    }
                 }
             }
 
@@ -641,43 +678,6 @@ ApplicationWindow {
     /*Passage Here*/
     ListModel {
         id: textModel
-
-        ListElement {
-            attributes: [
-                ListElement { description: "F" },
-                ListElement { description: "D" },
-                ListElement { description: "S" },
-                ListElement { description: "哈" },
-                ListElement { description: "哦" },
-                ListElement { description: "哈" },
-                ListElement { description: "哦" },
-                ListElement { description: "哈" },
-                ListElement { description: "哦" },
-                ListElement { description: "哈" },
-                ListElement { description: "哦" },
-                ListElement { description: "哈" },
-                ListElement { description: "哦" },
-                ListElement { description: "哈" },
-                ListElement { description: "哦" },
-                ListElement { description: " "}
-            ]
-        }
-        ListElement {
-            attributes: [
-                ListElement { description: "A" },
-                ListElement { description: "哈" },
-                ListElement { description: "哦" },
-                ListElement { description: "哈" },
-                ListElement { description: " " }
-            ]
-        }
-        ListElement {
-            attributes: [
-                ListElement { description: "s" },
-                ListElement { description: "g" },
-                ListElement { description: " " }
-            ]
-        }
     }
 
     Connections{
@@ -687,6 +687,7 @@ ApplicationWindow {
 //            currentFile.target = app.currentFile();
 //        }
         onFileLoaded:{
+            console.log("loaded");
             for(var i = 0; i < openFiles.count; i++){
                 if(openFiles.at(i).name == name){
                     openFileTabs.currentIndex = i;
