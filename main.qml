@@ -172,6 +172,12 @@ ApplicationWindow {
                         //insertStr(columnView._ep.x, columnView._ep.y, 'The quick brown fox jumps over the lazy dog\n The quick brown fox jump sover the lazy dog');
                         //eraseCha(columnView._ep.x, columnView._ep.y);
                         //eraseStr(columnView._sp.x, columnView._sp.y, columnView._ep.x, columnView._ep.y);
+                        for(var i = 0; i < 300; i++){
+                            textModel.append({attributes:[]});
+                            for(var j = 0; j < 40; j++){
+                                textModel.get(i).attributes.append({description:'t'});
+                            }
+                        }
                     }
 
                     signal insertCha(int column,int row,string cha);
@@ -519,20 +525,6 @@ ApplicationWindow {
                             parent.isSelecting = true;
                         }
                     }
-                    /*handle out of range*/
-                    var speed = 0.1;//scroll speed
-                    if(mouseX - columnView.x > root.width){
-                        var relativeX = mouseX - columnView.x;
-                        if(columnView.width - columnView.x >= root.width){
-                            hbar.position += speed * relativeX;
-                        }
-                    }
-                    if(mouseY - columnView.x > root.height){
-                        var relativeY = mouseY - columnView.y;
-                        if(columnView.height - columnView.y >= root.height){
-                            vbar.position += speed * relativeY;
-                        }
-                    }
                 }
                 onReleased: {
                     if(!parent.isSelecting){
@@ -757,6 +749,16 @@ ApplicationWindow {
         target: boomer
 
         /*----------修改Model操作----------*/
+        onAppend:{
+            if(textModel.count == 0) textModel.append({attributes:[]});
+            if(cha !== '\n'){
+                textModel.get(textModel.count - 1).attributes.append({description: cha});
+            }
+            else{
+                textModel.get(textModel.count - 1).attributes.append({description: ' '});
+                textModel.append({attributes:[]});
+            }
+        }
         onInsertCha:{//插入字符
             if(cha !== '\n'){
                 textModel.get(row).attributes.insert(column, {description: cha});
