@@ -102,13 +102,13 @@ bool TextStructure::insert(std::pair<int, int> position, QString newString)
     if( position.second>=i->size() )
         qDebug()<<position.second;
 
-    qDebug()<<position.first<<"  "<<position.second;
+    qDebug()<<"x:"<<position.first<<" y: "<<position.second;
     int j;
     QString slice;
     for(j=0;j<length;j++){
         if(newString[j]=='\n'){
-            QString rest = data(position, {position.first, i->size()});
-            i->erase(position.second, i->size());
+            QString rest = data(position, {position.first, i->size()-1});
+            i->erase(position.second, i->size()-1);
             i->insert(position.second, slice);
             text.emplace(++i, rest);
             position.second = 0;

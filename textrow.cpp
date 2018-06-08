@@ -68,7 +68,7 @@ bool TextRow::insert(int position, QString str)
 //    qDebug()<<" before if"<<current_size<<"  "<<current_capacity;
     if( current_size+length >= current_capacity )
     {    
-        qDebug()<<"in if"<<current_size<<"  "<<current_capacity;
+        //qDebug()<<"in if"<<current_size<<"  "<<current_capacity;
         int n=length/50;
         if( length%50!=0 )
               n = n+1;
