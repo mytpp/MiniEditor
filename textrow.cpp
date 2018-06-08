@@ -71,13 +71,20 @@ bool TextRow::insert(int position, QString str)
         row.reserve(current_capacity+n*50);      //considering the space is not enough
     }
 
-    QChar* data=str.data();             //inserting the whole string one by one
+//    QChar* data=str.data();             //inserting the whole string one by one
 
-    auto j = row.begin();
-    advance(j,position);
+//    auto j = row.begin();
+//    advance(j,position);
 
-    for(int i=0;i<length;i++,j++)
-        row.insert(j,data[i]);
+//    for(int i=0;i<length;i++,j++)
+//        row.insert(j,data[i]);
+
+    //shift QChar in the 'row' whose position is after 'pos' backwoard by 'length' characters
+    for(int i=current_size+length-1; i>position+length-1; --i)
+        row[i] = row[i-length];
+    //insert the string
+    for(int i=position; i<position+length; ++i)
+        row[i] = str[i-position];
 
     return true;
 }

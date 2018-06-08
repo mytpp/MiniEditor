@@ -7,14 +7,11 @@ TextStructure::TextStructure()
 
 }
 
-/*------返回position位置上的之间的QChar------*/
+/*------返回position位置上的QChar------*/
 QChar TextStructure::data(std::pair<int,int> position) const
 {
 
     int text_size=text.size();
-    int row_size;
-
-    QChar a();
 
     if(position.first>=text_size)
         qDebug()<<position.first;
@@ -25,7 +22,7 @@ QChar TextStructure::data(std::pair<int,int> position) const
     if( position.second>=i->size() )
         qDebug()<<position.second;
 
-    return  i->operator [](position.second) ;
+    return  (*i)[position.second];
 }
 
 
@@ -37,7 +34,6 @@ const QString TextStructure::data(std::pair<int, int> begin, std::pair<int, int>
     QChar append_char;
 
     int text_size=text.size();
-    int row_size;
 
     if(begin.first>=text_size)
         qDebug()<<begin.first;
@@ -71,7 +67,6 @@ const QString TextStructure::data(std::pair<int, int> begin, std::pair<int, int>
 bool TextStructure::insert(std::pair<int, int> position, QChar character)
 {
     int text_size=text.size();
-    int row_size;
 
     if(position.first>=text_size)
         qDebug()<<position.first;
