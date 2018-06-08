@@ -197,11 +197,16 @@ ApplicationWindow {
                                 onTriggered:  {
                                     console.log('trig');
                                     app.addFile();
+                                    inputBus.focus = true;
+                                    inputBus.forceActiveFocus();
                                 }
                             }
 
                             Action{
                                 text: "打开"
+                                onTriggered: {
+                                    fileDialog.open();
+                                }
                             }
                             Action{
                                 text: "保存"
@@ -454,6 +459,7 @@ ApplicationWindow {
                 cursorShape: Qt.IBeamCursor
                 onClicked: {
                     inputBus.focus = true;//activate inputBus
+                    inputBus.forceActiveFocus();
                     var targetRow = columnView.itemAt(mouseX, mouseY + columnView.contentY);
                     var targetItem = targetRow.children[0].itemAt(mouseX, 0);
 
@@ -600,6 +606,16 @@ ApplicationWindow {
             anchors.right: parent.right
             anchors.bottom: parent.bottom
         }
+
+//        MouseArea{
+//            anchors.fill: parent
+//            propagateComposedEvents: true
+//            onClicked: {
+//                console.log("set focus");
+//                inputBus.focus = true;
+//                inputBus.forceActiveFocus();
+//            }
+//        }
     }
 
     /*处理所有的键盘输入事件、快捷键*/
@@ -617,6 +633,8 @@ ApplicationWindow {
             app.currentFile().insert(_sp.y, _sp.x, inputBus.text);
             inputBus.clear();
         }
+
+        Keys.priority: Keys.AfterItem
         Keys.onPressed: {
             if(event.key == Qt.Key_Delete){
                 app.currentFile().erase(columnView.selectEnd.y, columnView.selectEnd.x);
@@ -678,6 +696,9 @@ ApplicationWindow {
     /*Passage Here*/
     ListModel {
         id: textModel
+        ListElement{
+            attributes:[ListElement{description:"t"},ListElement{description:"t"}]
+        }
     }
 
     Connections{
