@@ -5,10 +5,7 @@
 Application::Application()
     :openFiles(),
       current(openFiles.end())
-{
-    //debug
-    //openFiles.push_back(TextFile());
-}
+{ }
 
 void Application::addFile(QUrl address)
 {
@@ -86,12 +83,4 @@ void Application::saveAll()
     for(auto &file: openFiles)
         file.save();
 }
-
-QChar Application::addChar()
-{
-    QString a=tr("hh檀");
-    qDebug()<<a.size();
-    return a[2];
-}
-
 

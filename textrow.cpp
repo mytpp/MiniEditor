@@ -13,9 +13,11 @@ TextRow::TextRow()
 
 TextRow::TextRow(QString text)     //添加新内容到一行中
 {
-    int i;
-    for(i=0;i<text.size();i++)
-          row.push_back(text[i]);
+    row.reserve((text.size() / 50 + 1) * 50);//实际长度多一个换行符
+
+    for(int i=0;i<text.size();i++)
+        row.push_back(text[i]);
+    row.emplace_back('\n');//保证换行符始终在最后
 }
 
  int TextRow::size() const
@@ -30,7 +32,6 @@ TextRow::TextRow(QString text)     //添加新内容到一行中
 
 QChar TextRow::operator[](int position)const
 {
-    qDebug()<<position;
     return row[position];
 }
 
@@ -64,11 +65,8 @@ bool TextRow::insert(int position, QString str)
     if(  position > current_size )
         return false;                           //considering the position is undesirable
 
-//    qDebug()<<"length "<<length;
-//    qDebug()<<" before if"<<current_size<<"  "<<current_capacity;
     if( current_size+length >= current_capacity )
-    {    
-        //qDebug()<<"in if"<<current_size<<"  "<<current_capacity;
+    {
         int n=length/50;
         if( length%50!=0 )
               n = n+1;
@@ -83,9 +81,7 @@ bool TextRow::insert(int position, QString str)
     for(int i=position; i<position+length; ++i)
         row[i] = str[i-position];
 
-    //qDebug()<<"size:"<<row.size()<<" capacity: "<<row.capacity();
-
-    qDebug()<<"row:";
+    qDebug()<<"row after ins:";
     for(auto e: row)
         qDebug()<<e;
     return true;
@@ -124,8 +120,8 @@ bool TextRow::erase(int begin, int end)
     advance(j,end);
 
     row.erase(i,j);
-    return true;
 
+    return true;
 }
 
 bool TextRow::traverse(AbstractVisitor &visitor)

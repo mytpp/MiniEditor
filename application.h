@@ -37,9 +37,6 @@ public:
     Q_INVOKABLE void setCurrentFile(int index);
 
 
-    //debug
-    Q_INVOKABLE QChar addChar();
-
 signals:
     void fileLoaded(QString name);
 

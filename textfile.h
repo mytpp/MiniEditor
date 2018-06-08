@@ -57,10 +57,6 @@ public:
     Q_INVOKABLE void undo();
     Q_INVOKABLE void redo();
 
-    Q_INVOKABLE void test() {
-        testSlot(5);
-        qDebug()<<"send Signal testSlot successfully";
-    }
 
 signals:
     void testSlot(int event);

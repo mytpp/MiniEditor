@@ -42,8 +42,6 @@ TextFile::TextFile(QUrl address)
       historyList(),
       nextCommand(historyList.end())
 {
-    qDebug()<<"ff"<<address;
-    qDebug()<<address.url().toLocal8Bit().data()+8;
     if(file) {
         std::string line;
         QString line_16bit;
