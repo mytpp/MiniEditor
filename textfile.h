@@ -76,7 +76,7 @@ signals:
     void highlightCurrent(int row, int column, int length = 1);//highlight in different color
 
     //emit just just before a TextFile object is destroyed
-    void FileDestroyed();
+    void fileDestroyed();
 
 private:
     bool saveFile(QUrl path);

@@ -71,7 +71,7 @@ TextFile::TextFile(const TextFile &afile)
 }
 
 TextFile::~TextFile() {
-    emit FileDestroyed();
+    emit fileDestroyed();
 }
 
 void TextFile::display()
