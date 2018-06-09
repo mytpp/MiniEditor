@@ -59,10 +59,6 @@ public:
 
 
 signals:
-    void testSlot(int event);
-
-    /*signal destroyed() is provided by QObject*/
-
     //cha and str may contain '\n', which need special handling in QML
     void insertCha(int row, int column, QChar cha);
     void insertStr(int row, int column, QString str);
@@ -78,6 +74,9 @@ signals:
     void highlight(int row, int column, int length = 1);//for search result, maybe in yellow?
     //highlighting selected string (maybe in blue?) should be done just in QML, i.e. UI level.
     void highlightCurrent(int row, int column, int length = 1);//highlight in different color
+
+    //emit just just before a TextFile object is destroyed
+    void FileDestroyed();
 
 private:
     bool saveFile(QUrl path);

@@ -71,7 +71,9 @@ TextFile::TextFile(const TextFile &afile)
     qDebug()<<"TextFile Copy Constructed";
 }
 
-TextFile::~TextFile() = default;
+TextFile::~TextFile() {
+    emit FileDestroyed();
+}
 
 void TextFile::display()
 {
