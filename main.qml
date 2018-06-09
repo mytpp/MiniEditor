@@ -497,13 +497,6 @@ ApplicationWindow {
                 anchors.fill: parent
                 cursorShape: Qt.IBeamCursor
 
-                property real _mouseX: 0
-                property real _mouseY: 0
-                onPressed: {
-                    _mouseX = mouseX;
-                    _mouseY = mouseY;
-                }
-
                 onClicked: {
                     console.log('click');
                     //inputBus.focus = true;//activate inputBus
@@ -539,10 +532,8 @@ ApplicationWindow {
                             parent.selectEnd.x = columnIndex;
                             parent.currentIndex = parent.selectEnd.y;//set current index
                             lineView.currentIndex = parent.selectEnd.x;//set current index
-                            if(!parent.isSelecting){//init selected range
-                                parent.selectStart.y = parent.selectEnd.y
-                                parent.selectStart.x = parent.selectEnd.x
-                            }
+                            parent.selectStart.y = parent.selectEnd.y
+                            parent.selectStart.x = parent.selectEnd.x
                         }
                     }
 
@@ -669,16 +660,6 @@ ApplicationWindow {
             anchors.right: parent.right
             anchors.bottom: parent.bottom
         }
-
-//        MouseArea{
-//            anchors.fill: parent
-//            propagateComposedEvents: true
-//            onClicked: {
-//                console.log("set focus");
-//                inputBus.focus = true;
-//                inputBus.forceActiveFocus();
-//            }
-//        }
     }
 
     /*处理所有的键盘输入事件、快捷键*/
@@ -789,7 +770,7 @@ ApplicationWindow {
     }
     Connections{
         id:currentFile
-        target: boomer
+        target: null
 
         /*----------修改Model操作----------*/
         onAppend:{
@@ -797,10 +778,10 @@ ApplicationWindow {
             for(var i = 0; i < str.length; i++){
                 var cha = str[i];
                 if(cha !== '\n'){
-                    textModel.get(textModel.count - 1).attributes.append({description: cha});
+                    textModel.get(textModel.count - 1).attributes.append({description: cha, isSelect:false});
                 }
                 else{
-                    textModel.get(textModel.count - 1).attributes.append({description: ' '});
+                    textModel.get(textModel.count - 1).attributes.append({description: ' ', isSelect:false});
                     textModel.append({attributes:[]});
                 }
             }
@@ -946,9 +927,9 @@ ApplicationWindow {
         onHighlightCurrent:{
             columnView.drawHighlightRange(Qt.point(column, row), length, 'ac');
         }
-//        onDestroyed: {
-//            openFiles.remove(openFileTabs.currentIndex);
-//        }
+        onFileDestroyed: {
+            openFiles.remove(openFileTabs.currentIndex);
+        }
     }
 }
 
