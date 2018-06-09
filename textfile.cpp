@@ -110,6 +110,7 @@ bool TextFile::saveFile(QUrl path)
             url = path;
             name = url.fileName();
         }
+        isModified = false;
         return success;
     } else {
         QMessageBox::warning(nullptr, tr("Warning!"), tr("Couldn't find path:")+url.url(), QMessageBox::Ok);

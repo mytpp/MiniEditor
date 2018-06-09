@@ -86,6 +86,7 @@ ApplicationWindow {
                         anchors.fill: parent
                         onClicked: {
                             openFileTabs.currentIndex = index;
+                            textModel.clear();
                             app.setCurrentFile(index);
                         }
                     }
@@ -238,7 +239,8 @@ ApplicationWindow {
                             Action{
                                 text: "关闭"
                                 onTriggered: {
-                                    app.close();
+                                    if(app.closeAll())
+                                        Qt.quit();
                                 }
                             }
                         }
@@ -843,15 +845,22 @@ ApplicationWindow {
         target: app
         onFileLoaded:{
             console.log("loaded");
+            var exist = 0;
             for(var i = 0; i < openFiles.count; i++){
-                if(openFiles.at(i).name == name){
+                if(openFiles.get(i).name == name){
                     openFileTabs.currentIndex = i;
-                    return;
+                    exist = 1;
+                    break;
                 }
             }
-            openFiles.append({name: name});
-            openFileTabs.currentIndex = openFiles.count - 1;
+
+            if(!exist){
+                openFiles.append({name: name});
+                openFileTabs.currentIndex = openFiles.count - 1;
+            }
+            textModel.clear();
             currentFile.target = app.currentFile();
+            console.log("count "+openFiles.count);
         }
     }
     Connections{
@@ -1026,5 +1035,12 @@ ApplicationWindow {
             cursor.y = 0;
         }
     }
+
+    onClosing: {
+         close.accepted = false
+         if(app.closeAll())
+             Qt.quit();
+     }
+
 }
 

@@ -15,11 +15,11 @@ bool SaveVisitor::visit(QChar& element)
     if(lineBreaking)
         to<<"\n";
     if(element != '\n'){
+        lineBreaking = false;
         if(to << QString(element).toLocal8Bit().data())
             return true;
         else
             return false;
-        lineBreaking = false;
     } else {
         lineBreaking = true;
     }
