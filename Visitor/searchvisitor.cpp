@@ -9,16 +9,25 @@ SearchVisitor::SearchVisitor(QString format, Qt::CaseSensitivity cs)
     int i = 0;
     next[0] = -1;  //next[0]初始化为-1.  -1表示不存在相同的最大前缀和最大后缀
     int j = -1;    //j初始化为-1
-    while(i < format.size())
+    while( i < format.size() )
     {
-        if(j==-1 || format[i] == format[j] )
+        if(j==-1 || equal(format[i],format[j] ) )
         {
             i++;
             j++;
             next[i]=j;
         }
-        else j = next[j];
+        else
+            j = next[j];
     }
+}
+
+bool SearchVisitor:: equal(QChar a, QChar b)
+{
+    if(sensitivity==Qt::CaseSensitive)
+       return a == b;
+    else
+    return a.toLower()==b.toLower();
 }
 
 SearchVisitor::~SearchVisitor()
@@ -32,7 +41,7 @@ bool SearchVisitor::visit(QChar& element)
     if(element!='\n' && index < target.size())
     {
        column_count++;
-       while(index>-1 && element!=target[index])
+       while(  index>-1 && !equal(element,target[index])   )
            index=next[index];
        index++;
        if (index == target.size()-1)
@@ -70,4 +79,7 @@ bool SearchVisitor::noResult()
 {
     return result.empty();
 }
+
+
+
 
