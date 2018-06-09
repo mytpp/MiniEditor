@@ -19,9 +19,6 @@ SearchVisitor::SearchVisitor(QString format, Qt::CaseSensitivity cs)
         else
             j = next[j];
     }
-    qDebug()<<"next";
-    for(int i=0; i<format.size(); i++)
-        qDebug()<<next[i];
 }
 
 bool SearchVisitor:: equal(QChar a, QChar b)

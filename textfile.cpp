@@ -123,11 +123,11 @@ bool TextFile::canClose()
     if(isModified) {
         QMessageBox::StandardButton pressed =
                 QMessageBox::warning(nullptr, tr("MiniWord"),
-                                     tr("The file has been modified. Save changes?"),
+                                     tr("File \"") + name + tr("\" has been modified. Save changes?"),
                                      QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
-        if (pressed == QMessageBox::Save){
+        if (pressed == QMessageBox::Save)
             return save();
-        }else if (pressed == QMessageBox::Cancel)
+        else if (pressed == QMessageBox::Cancel)
             return false;
         return true;     //refuse to save (Discard)
     } else {
@@ -217,20 +217,7 @@ void TextFile::replaceAll(QString newString)
     (*replaceCommand)();
     addCommand(std::move(replaceCommand));
 
-    /*adjust all positions in search result*/
-    int offset = 0;
-    int currentLine = 0;
-    int length = (searchVisitor->getFormat()).size();
-    auto &result = searchVisitor->getResult();
-    for(auto& pos : result) {
-        if(currentLine != pos.first)
-            offset = 0;
-        pos.second += length*offset;
-        offset++;
-    }
-
-    emit highlightAll(newString.size());
-    result.clear();
+    (searchVisitor->getResult()).clear();
 }
 
 void TextFile::replaceCurrent(QString newString)
@@ -242,18 +229,22 @@ void TextFile::replaceCurrent(QString newString)
     int length = (searchVisitor->getFormat()).size();
     auto &result = searchVisitor->getResult();
 
-    eraseStr(row, column, row, column+length);
+    erase(row, column, row, column+length);
     insert(row, column, newString);
 
     //erase the replaced item from search result
     auto iter = result.erase(currentSearchResult);
-    currentSearchResult = iter - 1;
+    if(!result.empty())
+        if(iter == result.end())
+            currentSearchResult = result.begin();
+        else
+            currentSearchResult = iter;
 
     //adjust the positions in search result which is in the same line as 'currentSearchResult'
-    while(iter != result.end() && iter->first == row)
+    while(iter != result.end() && iter->first == row){
         iter->second += newString.size() - length;
-
-    emit highlightCurrent(row, column, newString.size());
+        iter++;
+    }
 }
 
 void TextFile::cut(int rowBegin, int colBegin, int rowEnd, int colEnd)
