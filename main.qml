@@ -238,7 +238,8 @@ ApplicationWindow {
                             Action{
                                 text: "关闭"
                                 onTriggered: {
-                                    app.close();
+                                    if(app.closeAll())
+                                        Qt.quit();
                                 }
                             }
                         }
@@ -1008,5 +1009,12 @@ ApplicationWindow {
             cursor.y = 0;
         }
     }
+
+    onClosing: {
+         close.accepted = false
+         if(app.closeAll())
+             Qt.quit();
+     }
+
 }
 
