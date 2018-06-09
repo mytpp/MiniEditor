@@ -177,19 +177,21 @@ ApplicationWindow {
                         //insertStr(columnView._ep.x, columnView._ep.y, 'The quick brown fox jumps over the lazy dog\n The quick brown fox jump sover the lazy dog');
                         //eraseCha(columnView._ep.x, columnView._ep.y);
                         //eraseStr(columnView._sp.x, columnView._sp.y, columnView._ep.x, columnView._ep.y);
-//                        for(var i = 0; i < 100; i++){
-//                            textModel.append({attributes:[]});
-//                            for(var j = 0; j < 45; j++){
-//                                textModel.get(i).attributes.append({description:'测'});
-//                            }
-//                        }
+                        for(var i = 0; i < 100; i++){
+                            textModel.append({attributes:[]});
+                            for(var j = 0; j < 45; j++){
+                                textModel.get(i).attributes.append({description: j.toString(), isHighlight:false});
+                            }
+                        }
+                        currentFile.target = cF;
 //                        for(var i = 0; i < 300; i++){
 //                            for(var j = 0; j < 20; j++){
 //                                append('F');
 //                            }
 //                            append('\n');
 //                        }
-                        columnView.drawHighlightRange(Qt.point(0, 0), 5, 'na');
+                        //columnView.drawHighlightRange(Qt.point(0, 0), 5, 'na');
+//                        columnView.model = textModel;
 
                     }
 
@@ -427,6 +429,7 @@ ApplicationWindow {
 
         property int fontPixelSize: 20//font size
 
+
         /*定义每行的结构*/
         Component{
             id:rowComp
@@ -436,8 +439,7 @@ ApplicationWindow {
                 width: rowView.width
 
                 property int _index: index
-
-                //property bool isSelected: (index >= columnView._sp.y && index <= columnView._ep.y) ? true : false
+                property bool isSelected: (index >= columnView._sp.y && index <= columnView._ep.y) ? true : false
 
                 ListView{
                     id:rowView
@@ -446,19 +448,18 @@ ApplicationWindow {
                     width: childrenRect.width
                     orientation:ListView.Horizontal
                     delegate:Text {
-//                        property bool isSelected: rowRec.isSelected
-//                                                   && index >= ((rowRec._index == columnView._sp.y) ? columnView._sp.x : 0)
-//                                                   && index < ((rowRec._index == columnView._ep.y) ? columnView._ep.x : rowView.count) ?
-//                                                      true : false
-                        property bool isSelected: isSelect
+                        //property bool isSelected: isSelect
                         property bool isHL: isHighlight
                         property string highlightMode: ""
                         text: description
                         font.pixelSize: view.fontPixelSize
+                        property bool isSelected: (rowRec.isSelected
+                                                                           && index >= ((rowRec._index === columnView._sp.y) ? columnView._sp.x : 0)
+                                                                           && index < ((rowRec._index === columnView._ep.y) ? columnView._ep.x : rowView.count)) ?
+                                                                              true : false
                         Rectangle{
                             z:-1 //below text
                             anchors.fill: parent
-//                            color: parent.isSelected ? "#5698c3" : (parent.highlightMode == "na" ? "#fed71a" : (parent.highlightMode == "ac" ? "#5698c3" : "white"))
                             color: (parent.isSelected) ? "#5698c3" : ((parent.isHL) ? "#fed71a" : "white")
                         }
                     }
@@ -470,13 +471,11 @@ ApplicationWindow {
         ListView{
             id:columnView
             x:-hbar.position*width
-            y:-vbar.position*height
             interactive: false//disable drag
             width: contentItem.childrenRect.width
             height: parent.height
             model: textModel
             delegate: rowComp
-//            cacheBuffer: 0
 
             property bool isSelecting: false
             property point selectStart: Qt.point(0, 0);
@@ -506,33 +505,30 @@ ApplicationWindow {
                     }
                 }
                 else if (mode === 'ac'){//选中
-                    textModel.get(startPoint.y).attributes.get(startPoint.x).isSelect = true;
+//                    textModel.get(startPoint.y).attributes.get(startPoint.x).isSelect = true;
                     columnView.selectStart.x = startPoint.x;
                     columnView.selectEnd.x = startPoint.x + dl;
                     columnView.selectStart.y = columnView.selectEnd.y = startPoint.y;
-                    textModel.get(startPoint.y).attributes.get(startPoint.x + dl - 1).isSelect = true;
+//                    textModel.get(startPoint.y).attributes.get(startPoint.x + dl - 1).isSelect = true;
                     columnView.currentIndex = startPoint.y;
                     columnView.currentItem.children[0].currentIndex = startPoint.x + dl;
                     cursor.fixPosition();
                 }
                 else if (mode === "clear") {//清除状态
                     for(var i = startPoint.x; i < dl + startPoint.x; i++){
-                        textModel.get(startPoint.y).attributes.get(i).isHighlight = false;
+//                        textModel.get(startPoint.y).attributes.get(i).isHighlight = false;
                     }
                 }
                 else if(mode === 'ck'){//清除选中（跳至下一个）
-                    textModel.get(startPoint.y).attributes.get(startPoint.x).isSelect = false;
-                    textModel.get(startPoint.y).attributes.get(startPoint.x + dl - 1).isSelect = false;
+//                    textModel.get(startPoint.y).attributes.get(startPoint.x).isSelect = false;
+//                    textModel.get(startPoint.y).attributes.get(startPoint.x + dl - 1).isSelect = false;
                 }
             }
 
             function clearHighlight(){
                 for(var i = 0; i < textModel.count; i++){
                     for(var j = 0; j < textModel.get(i).attributes.count; j++){
-                        if(textModel.get(i).attributes.get(j).isHighlight){
-                            textModel.get(i).attributes.get(j).isHighlight = false;
-                        }
-                        columnView.forceLayout();
+                        textModel.get(i).attributes.get(j).isHighlight = false;
                     }
                 }
             }
@@ -558,94 +554,67 @@ ApplicationWindow {
                 cursorShape: Qt.IBeamCursor
 
                 onClicked: {
-                    console.log('click');
-                    //inputBus.focus = true;//activate inputBus
+                    inputBus.focus = true;//activate inputBus
                     inputBus.forceActiveFocus();
                     var targetRow = columnView.itemAt(mouseX, mouseY + columnView.contentY);
                     var targetItem = targetRow.children[0].itemAt(mouseX, 0);
 
                     if ((mouse.button == Qt.LeftButton) && (mouse.modifiers & Qt.ShiftModifier)){
-                        //shift + leftClick设置选区
+                        //shift + leftClick 设置选区
                         var rowIndex = columnView.indexAt(mouseX, mouseY);//y-axis
                         var columnIndex = rowIndex !== -1 ? columnView.itemAt(mouseX, mouseY + columnView.contentY).children[0].indexAt(mouseX, 0) : -1;//x-axis
                         if(rowIndex >= 0 && columnIndex >= 0){
-                            console.log('shift');
-                            //获取之前光标所在位置，设置为选区起点
+                            // 获取之前光标所在位置，设置为选区起点
                             parent.selectStart.y = columnView.indexAt(cursor.x, cursor.y + columnView.contentY);
                             parent.selectStart.x = columnView.itemAt(cursor.x, cursor.y + columnView.contentY).children[0].indexAt(cursor.x, 0);
-                            //设置选区终点为当前鼠标所在位置
+                            // 设置选区终点为当前鼠标所在位置
                             parent.selectEnd.y = columnView.indexAt(mouseX, mouseY + columnView.contentY);
                             parent.selectEnd.x = columnView.itemAt(mouseX, mouseY + columnView.contentY).children[0].indexAt(mouseX, 0);
-                            textModel.get(parent.selectStart.y).attributes.get(parent.selectStart.x).isSelect = true;
-                            textModel.get(parent.selectEnd.y).attributes.get(parent.selectEnd.x - 1).isSelect = true;
-                        }
-                    }
-                    else{
-                        textModel.get(parent.selectStart.y).attributes.get(parent.selectStart.x).isSelect = false;
-                        textModel.get(parent.selectEnd.y).attributes.get(parent.selectEnd.x).isSelect = false;
-
-                        var rowIndex = columnView.indexAt(mouseX, mouseY + columnView.contentY);//y-axis
-                        var lineView = columnView.itemAt(mouseX, mouseY + columnView.contentY).children[0];
-                        var columnIndex = lineView.indexAt(mouseX, 5);//x-axis
-                        if(rowIndex >= 0 && columnIndex >= 0){
-                            parent.selectEnd.y = rowIndex;
-                            parent.selectEnd.x = columnIndex;
-                            parent.currentIndex = parent.selectEnd.y;//set current index
-                            lineView.currentIndex = parent.selectEnd.x;//set current index
-                            parent.selectStart.y = parent.selectEnd.y
-                            parent.selectStart.x = parent.selectEnd.x
                         }
                     }
 
-                    //设置光标位置
+                    // 设置光标位置
                     cursor.x = targetItem.x;
                     cursor.y = targetRow.y - columnView.contentY;
-                    console.log('escape click');
                 }
                 onPositionChanged: {
-//                    /*since the hoverEnable is false, will only matter when pressed down*/
-//                    if(Math.abs(_mouseX - mouseX) >= 16 || Math.abs(_mouseY - mouseY) >= 16){
-//                        _mouseX = mouseX;
-//                        _mouseY = mouseY;
-//                        var rowIndex = columnView.indexAt(mouseX, mouseY + columnView.contentY);//y-axis
-//                        var columnIndex = columnView.itemAt(mouseX, mouseY + columnView.contentY).children[0].indexAt(mouseX, 0);//x-axis
-//                        console.log('get pos:' + rowIndex + ':' + columnIndex);
-//                    }
-////                    var rowIndex = columnView.indexAt(mouseX, mouseY + columnView.contentY);//y-axis
-////                    var columnIndex = columnView.itemAt(mouseX, mouseY + columnView.contentY).children[0].indexAt(mouseX, 0);//x-axis
-//                    console.log('get pos:' + rowIndex + ':' + columnIndex);
-//                    if(rowIndex >= 0 && columnIndex >= 0){
-//                        parent.selectEnd.y = columnView.indexAt(mouseX, mouseY + columnView.contentY);
-//                        var lineView = columnView.itemAt(mouseX, mouseY + columnView.contentY).children[0];
-//                        parent.selectEnd.x = lineView.indexAt(mouseX, 0);
-//                        if(!parent.isSelecting){//init selected range
-//                            parent.selectStart.y = parent.selectEnd.y
-//                            parent.selectStart.x = parent.selectEnd.x
-//                            parent.isSelecting = true;
-//                        }
-//                    }
-//                    console.log('escape');
+                    /*since the hoverEnable is false, will only matter when pressed down*/
+                    var rowIndex = columnView.indexAt(mouseX, mouseY + columnView.contentY);//y-axis
+                    var columnIndex = rowIndex !== -1 ? columnView.itemAt(mouseX, mouseY + columnView.contentY).children[0].indexAt(mouseX, 0) : -1;//x-axis
+                    if(rowIndex >= 0 && columnIndex >= 0){
+                        var _end = Qt.point(parent.selectEnd.x, parent.selectEnd.y)
+                        parent.selectEnd.y = columnView.indexAt(mouseX, mouseY + columnView.contentY);
+                        var lineView = columnView.itemAt(mouseX, mouseY + columnView.contentY).children[0];
+                        parent.selectEnd.x = lineView.indexAt(mouseX, 0);
+                        parent.currentIndex = parent.selectEnd.y;//set current index
+                        lineView.currentIndex = parent.selectEnd.x;//set current index
+                        if(!parent.isSelecting){//init selected range
+                            parent.selectStart.y = parent.selectEnd.y
+                            parent.selectStart.x = parent.selectEnd.x
+                            parent.isSelecting = true;
+                        }
+                    }
                 }
                 onReleased: {
-//                    console.log('release');
-//                    if(!parent.isSelecting){
-//                        var rowIndex = columnView.indexAt(mouseX, mouseY + columnView.contentY);//y-axis
-//                        var lineView = columnView.itemAt(mouseX, mouseY + columnView.contentY).children[0];
-//                        var columnIndex = lineView.indexAt(mouseX, 5);//x-axis
-//                        if(rowIndex >= 0 && columnIndex >= 0){
-//                            parent.selectEnd.y = rowIndex;
-//                            parent.selectEnd.x = columnIndex;
-//                            parent.currentIndex = parent.selectEnd.y;//set current index
-//                            lineView.currentIndex = parent.selectEnd.x;//set current index
-//                            if(!parent.isSelecting){//init selected range
-//                                parent.selectStart.y = parent.selectEnd.y
-//                                parent.selectStart.x = parent.selectEnd.x
-//                            }
-//                        }
-//                    }
-//                    parent.isSelecting = false;
-//                    console.count('escape release');
+                    if(!parent.isSelecting){
+                        var rowIndex = columnView.indexAt(mouseX, mouseY + columnView.contentY);//y-axis
+                        var columnIndex = rowIndex !== -1 ? columnView.itemAt(mouseX, mouseY).children[0].indexAt(mouseX, 0) : -1;//x-axis
+                        if(rowIndex >= 0 && columnIndex >= 0){
+                            var _end = Qt.point(parent.selectEnd.x, parent.selectEnd.y)
+                            parent.selectEnd.y = columnView.indexAt(mouseX, mouseY + columnView.contentY);
+                            var lineView = columnView.itemAt(mouseX, mouseY + columnView.contentY).children[0];
+                            parent.selectEnd.x = lineView.indexAt(mouseX, 0);
+                            parent.currentIndex = parent.selectEnd.y;//set current index
+                            lineView.currentIndex = parent.selectEnd.x;//set current index
+                            if(!parent.isSelecting){//init selected range
+                                parent.selectStart.y = parent.selectEnd.y
+                                parent.selectStart.x = parent.selectEnd.x
+                            }
+                        }
+                    }
+                    parent.isSelecting = false;
                 }
+
                 onWheel: {
                     parent.flick(0, wheel.angleDelta.y * 5);
                 }
@@ -659,8 +628,6 @@ ApplicationWindow {
                 x:0
                 y:0
                 color: "#1772b4"
-                property real save_mouseX: 0
-                property real save_mouseY: 0
                 SequentialAnimation{//闪烁动画
                     running: true
                     loops: Animation.Infinite
@@ -705,18 +672,6 @@ ApplicationWindow {
             orientation: Qt.Horizontal
             size: view.width / columnView.contentItem.childrenRect.width
             anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.bottom: parent.bottom
-        }
-
-        /*ListView的纵坐标绑定到此*/
-        ScrollBar {
-            id: vbar
-            hoverEnabled: true
-            active: hovered || pressed
-            orientation: Qt.Vertical
-            size: view.height / columnView.contentHeight
-            anchors.top: parent.top
             anchors.right: parent.right
             anchors.bottom: parent.bottom
         }
@@ -892,13 +847,14 @@ ApplicationWindow {
             cursor.y = 0;
             columnView.selectStart.x = columnView.selectEnd.x = 0;
             columnView.selectEnd.y = columnView.selectStart.y = 0;
-            currentFile.target = app.currentFile();
+            currentFile.target = cF;
             console.log("count "+openFiles.count);
         }
     }
     Connections{
         id:currentFile
         target: null
+        ignoreUnknownSignals: true
 
         /*----------修改Model操作----------*/
         onAppend:{
@@ -907,24 +863,24 @@ ApplicationWindow {
             for(var i = 0; i < str.length; i++){
                 var cha = str[i];
                 if(cha !== '\n'){
-                    textModel.get(textModel.count - 1).attributes.append({description: cha, isSelect:false, isHighlight:false});
+                    textModel.get(textModel.count - 1).attributes.append({description: cha, isHighlight:false});
                 }
                 else{
-                    textModel.get(textModel.count - 1).attributes.append({description: ' ', isSelect:false, isHighlight:false});
+                    textModel.get(textModel.count - 1).attributes.append({description: ' ', isHighlight:false});
                     textModel.append({attributes:[]});
                 }
             }
         }
         onInsertCha:{//插入字符
             if(cha !== '\n'){
-                textModel.get(row).attributes.insert(column, {description: cha, isSelect:false, isHighlight:false});
+                textModel.get(row).attributes.insert(column, {description: cha, isHighlight:false});
                 //修复插入后光标位置
                 columnView.selectEnd.x = columnView.selectStart.x = column + 1;
                 columnView.currentItem.children[0].currentIndex = column + 1;
                 cursor.fixPosition();
             }
             else{
-                textModel.insert(row + 1, {attributes:[{description:' ', isSelect:false, isHighlight:false}]});//插入末尾空字符
+                textModel.insert(row + 1, {attributes:[{description:' ', isHighlight:false}]});//插入末尾空字符
                 var preLine = textModel.get(row).attributes;
                 //textModel.get(row + 1).attributes.splice(0, 0, preLine.splice(columu, preLine.length - 1 - column));
                 for(var i = preLine.count - 2; i >= column; i--){
@@ -944,7 +900,7 @@ ApplicationWindow {
             var _column = column;
             for(var i = 0; i < str.length; i++){
                 if(str[i] !== '\n'){
-                    textModel.get(_row).attributes.insert(_column, {description: str[i], isSelect:false, isHighlight:false});
+                    textModel.get(_row).attributes.insert(_column, {description: str[i], isHighlight:false});
                     columnView.selectEnd.x = columnView.selectStart.x = _column + 1;
                     columnView.currentItem.children[0].currentIndex = _column + 1;
                     _column++;
@@ -953,7 +909,7 @@ ApplicationWindow {
                     var element = {
                         attributes:[]
                     }
-                    element.attributes.push({description:' ', isSelect:false, isHighlight:false});
+                    element.attributes.push({description:' ', isHighlight:false});
                     textModel.insert(_row + 1, element);
                     var preLine = textModel.get(_row).attributes;
                     //textModel.at(_row + 1).attributes.splice(0, 0, preLine.splice(_column, preLine.length - 1 - _column));

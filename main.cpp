@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
 
     QQmlContext *root=engine.rootContext();
-    Application myapp;
+    Application myapp(root);
     root->setContextProperty("app", &myapp);
 
     /*Load Fonts*/
