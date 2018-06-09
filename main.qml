@@ -309,12 +309,6 @@ ApplicationWindow {
                     console.log('search');
                     app.currentFile().search(searchInput.text);
                 }
-
-//                Keys.onPressed: {
-//                    if(event.key == Qt.Key_Enter){
-
-//                    }
-//                }
             }
             Button{
                 anchors.verticalCenter: parent.verticalCenter
@@ -708,6 +702,62 @@ ApplicationWindow {
                     var _ep = columnView.getTruthPoint()["_ep"];
                     app.currentFile().erase(_sp.y, _sp.x, _ep.y, _ep.x);
                 }
+            }
+            else if(event.key == Qt.Key_Up){
+                console.log('up');
+                if(columnView.selectEnd.y <= 0) return;
+                var bound = textModel.get(columnView.selectEnd.y - 1).attributes.count - 1;
+                if(columnView.selectEnd.x > bound){
+                    var endPos = bound;
+                    columnView.selectStart.x = columnView.selectEnd.x = endPos;
+                    columnView.selectStart.y--;
+                    columnView.selectEnd.y--;
+                    columnView.currentIndex = columnView.selectEnd.y;
+                    columnView.currentItem.children[0].currentIndex = columnView.selectEnd.x;
+                }
+                else{
+                    columnView.selectStart.y--;
+                    columnView.selectEnd.y--;
+                    columnView.currentIndex = columnView.selectEnd.y;
+                    columnView.currentItem.children[0].currentIndex = columnView.selectEnd.x;
+                }
+                cursor.fixPosition();
+            }
+            else if(event.key == Qt.Key_Down){
+                if(columnView.selectEnd.y >= textModel.count - 2) return;
+                console.log('down')
+                var bound = textModel.get(columnView.selectEnd.y + 1).attributes.count - 1;
+                if(columnView.selectEnd.x > bound){
+                    var endPos = bound;
+                    columnView.selectStart.x = columnView.selectEnd.x = endPos;
+                    columnView.selectStart.y++;
+                    columnView.selectEnd.y++;
+                    columnView.currentIndex = columnView.selectEnd.y;
+                    columnView.currentItem.children[0].currentIndex = columnView.selectEnd.x;
+                }
+                else{
+                    columnView.selectStart.y++;
+                    columnView.selectEnd.y++;
+                    columnView.currentIndex = columnView.selectEnd.y;
+                    columnView.currentItem.children[0].currentIndex = columnView.selectEnd.x;
+                }
+                cursor.fixPosition();
+            }
+            else if(event.key == Qt.Key_Left){
+                console.log('left');
+                if(columnView.selectEnd.x <= 0) return;
+                columnView.selectEnd.x--;
+                columnView.selectStart.x--;
+                columnView.currentItem.children[0].currentIndex--;
+                cursor.fixPosition();
+            }
+            else if(event.key == Qt.Key_Right){
+                console.log('right')
+                if(columnView.selectEnd.x >= textModel.get(columnView.selectEnd.y).attributes.count - 1) return;
+                columnView.selectEnd.x++;
+                columnView.selectStart.x++;
+                columnView.currentItem.children[0].currentIndex++;
+                cursor.fixPosition();
             }
         }
 
