@@ -26,9 +26,7 @@ TextFile::TextFile()
       historyList(),
       nextCommand(historyList.end())
 {
-    //text->insert({0,0}, QChar('\n'));
     qDebug()<<"Empty TextFile Construted";
-    //qDebug()<<QUrl("file:file.txt").url();
 }
 
 TextFile::TextFile(QUrl address)
