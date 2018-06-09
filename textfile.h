@@ -1,4 +1,4 @@
-#ifndef TEXTFILE_H
+﻿#ifndef TEXTFILE_H
 #define TEXTFILE_H
 
 #include <Qt>
