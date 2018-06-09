@@ -428,7 +428,7 @@ ApplicationWindow {
                             z:-1 //below text
                             anchors.fill: parent
 //                            color: parent.isSelected ? "#5698c3" : (parent.highlightMode == "na" ? "#fed71a" : (parent.highlightMode == "ac" ? "#5698c3" : "white"))
-                            color: (parent.isSelected && parent.isHL) ? "#5698c3" : ((parent.isHL) ? "#fed71a" : "white")
+                            color: (parent.isSelected) ? "#5698c3" : ((parent.isHL) ? "#fed71a" : "white")
                         }
                     }
                 }
@@ -468,19 +468,24 @@ ApplicationWindow {
              *@params: {string} mode "clear" or "highlight" or maybe more
              */
             function drawHighlightRange(startPoint, dl, mode){
-//                var rowTargetItem = columnView.contentItem.children[startPoint.y];
-                for(var i = startPoint.x; i < dl + startPoint.x; i++){
-//                    var targetItem = rowTargetItem.children[0].contentItem.children[i];
-                    if(mode === "na") {
+                if(mode === 'na'){
+                    for(var i = startPoint.x; i < dl + startPoint.x; i++){
                         textModel.get(startPoint.y).attributes.get(i).isHighlight = true;
                     }
-
-                    else if(mode === "ac") {
+                }
+                else if (mode === 'ac'){
+                    textModel.get(startPoint.y).attributes.get(startPoint.x).isSelect = true;
+                    columnView.selectStart.x = startPoint.x;
+                    columnView.selectEnd.x = startPoint.x + dl - 1;
+                    columnView.selectStart.y = columnView.selectEnd.y = startPoint.y;
+                    textModel.get(startPoint.y).attributes.get(startPoint.x + dl - 1).isSelect = true;
+                    columnView.currentIndex = startPoint.y;
+                    columnView.currentItem.children[0].currentIndex = startPoint.x + dl;
+                    cursor.fixPosition();
+                }
+                else if (mode === "clear") {
+                    for(var i = startPoint.x; i < dl + startPoint.x; i++){
                         textModel.get(startPoint.y).attributes.get(i).isHighlight = true;
-                    }
-
-                    else if (mode === "clear") {
-                        textModel.get(startPoint.y).attributes.get(i).isHighlight = false;
                     }
                 }
             }
@@ -523,7 +528,7 @@ ApplicationWindow {
                             parent.selectStart.x = columnView.itemAt(cursor.x, cursor.y + columnView.contentY).children[0].indexAt(cursor.x, 0);
                             //设置选区终点为当前鼠标所在位置
                             parent.selectEnd.y = columnView.indexAt(mouseX, mouseY + columnView.contentY);
-                            parent.selectEnd.x = columnView.itemAt(mouseX, mouseY + columnView.contentY).children[0].indexAt(mouseX, 0);
+                            parent.selectEnd.x = columnView.itemAt(mouseX, mouseY + columnView.contentY).children[0].indexAt(mouseX, 0) - 1;
                             textModel.get(parent.selectStart.y).attributes.get(parent.selectStart.x).isSelect = true;
                             textModel.get(parent.selectEnd.y).attributes.get(parent.selectEnd.x).isSelect = true;
                         }
@@ -694,7 +699,7 @@ ApplicationWindow {
         Keys.priority: Keys.BeforeItem
         Keys.onPressed: {
             if(event.key == Qt.Key_Delete){
-                console.log('delete')
+                console.log('delete');
                 app.currentFile().erase(columnView.selectEnd.y, columnView.selectEnd.x);
             }
             else if(event.key == Qt.Key_Backspace){
@@ -994,6 +999,9 @@ ApplicationWindow {
         }
         onFileDestroyed: {
             openFiles.remove(openFileTabs.currentIndex);
+            textModel.clear();
+            cursor.x = 0;
+            cursor.y = 0;
         }
     }
 }
