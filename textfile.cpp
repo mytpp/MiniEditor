@@ -47,7 +47,8 @@ TextFile::TextFile(QUrl address)
         QString line_16bit;
         for (int i=0; std::getline(file, line); i++) {
             line_16bit = QString::fromLocal8Bit(line.c_str());
-            line_16bit.append('\n');
+            if(!file.eof())
+                line_16bit.append('\n');
             text->insert({i,0}, line_16bit);
         }
         file.close();

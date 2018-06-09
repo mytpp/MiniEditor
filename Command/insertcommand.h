@@ -20,14 +20,6 @@ public:
     virtual void redo() override;
 
 private:
-    void insert();
-    void erase();
-
-    //by EditCommand::invoker()
-    void sendInsertSignal();
-    void sendEraseSignal();
-
-private:
     enum {CHA, STR} token;
     //necessary to store two positions?
     //Maybe. Because chunk may contain '\n', which can be a trouble

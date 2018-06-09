@@ -19,14 +19,6 @@ public:
     virtual void redo() override;
 
 private:
-    void insert();
-    void erase();
-
-    //by EditCommand::invoker()
-    void sendInsertSignal();
-    void sendEraseSignal();
-
-private:
     enum {CHA, STR} token;
     std::pair<int,int> begin;
     std::pair<int,int> end;
