@@ -469,7 +469,7 @@ ApplicationWindow {
              */
             function drawHighlightRange(startPoint, dl, mode){
 //                var rowTargetItem = columnView.contentItem.children[startPoint.y];
-                for(var i = startPoint.x; i < dl; i++){
+                for(var i = startPoint.x; i < dl + startPoint.x; i++){
 //                    var targetItem = rowTargetItem.children[0].contentItem.children[i];
                     if(mode === "na") {
                         textModel.get(startPoint.y).attributes.get(i).isHighlight = true;
@@ -986,7 +986,7 @@ ApplicationWindow {
         }
         /*--------高亮操作--------*/
         onHighlight:{
-            console.log('qml high')
+            console.log(column + ':' + row + ':' + length);
             columnView.drawHighlightRange(Qt.point(column, row), length, 'na');
         }
         onHighlightCurrent:{
