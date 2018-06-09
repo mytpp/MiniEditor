@@ -172,10 +172,15 @@ ApplicationWindow {
                         //insertStr(columnView._ep.x, columnView._ep.y, 'The quick brown fox jumps over the lazy dog\n The quick brown fox jump sover the lazy dog');
                         //eraseCha(columnView._ep.x, columnView._ep.y);
                         //eraseStr(columnView._sp.x, columnView._sp.y, columnView._ep.x, columnView._ep.y);
-                        for(var i = 0; i < 300; i++){
-                            textModel.append({attributes:[]});
-                            for(var j = 0; j < 40; j++){
-                                textModel.get(i).attributes.append({description:'t'});
+//                        for(var i = 0; i < 100; i++){
+//                            textModel.append({attributes:[]});
+//                            for(var j = 0; j < 45; j++){
+//                                textModel.get(i).attributes.append({description:' '});
+//                            }
+//                        }
+                        for(var i = 0; i < textModel.count; i++){
+                            for(var j = 0; j < textModel.get(i).attributes.count; j++){
+                                console.log(textModel.get(i).attributes.get(j).description);
                             }
                         }
                     }
@@ -299,6 +304,7 @@ ApplicationWindow {
 
                 Keys.onPressed: {
                     if(event.key == Qt.Key_Enter){
+                        console.log('search');
                         app.currentFile().search(searchInput.text);
                     }
                 }
@@ -311,6 +317,7 @@ ApplicationWindow {
                 text: "\uf060"
 
                 onClicked: {
+                    console.log('show pre');
                     app.currentFile().showPrevious();
                 }
             }
@@ -322,6 +329,7 @@ ApplicationWindow {
                 text: "\uf061"
 
                 onClicked: {
+                    console.log("show next");
                     app.currentFile().showNext();
                 }
             }
@@ -513,12 +521,11 @@ ApplicationWindow {
                     var rowIndex = columnView.indexAt(mouseX, mouseY + columnView.contentY);//y-axis
                     var columnIndex = rowIndex !== -1 ? columnView.itemAt(mouseX, mouseY + columnView.contentY).children[0].indexAt(mouseX, 0) : -1;//x-axis
                     if(rowIndex >= 0 && columnIndex >= 0){
-                        var _end = Qt.point(parent.selectEnd.x, parent.selectEnd.y)
                         parent.selectEnd.y = columnView.indexAt(mouseX, mouseY + columnView.contentY);
                         var lineView = columnView.itemAt(mouseX, mouseY + columnView.contentY).children[0];
                         parent.selectEnd.x = lineView.indexAt(mouseX, 0);
-                        parent.currentIndex = parent.selectEnd.y;//set current index
-                        lineView.currentIndex = parent.selectEnd.x;//set current index
+//                        parent.currentIndex = parent.selectEnd.y;//set current index
+//                        lineView.currentIndex = parent.selectEnd.x;//set current index
                         if(!parent.isSelecting){//init selected range
                             parent.selectStart.y = parent.selectEnd.y
                             parent.selectStart.x = parent.selectEnd.x
@@ -531,7 +538,6 @@ ApplicationWindow {
                         var rowIndex = columnView.indexAt(mouseX, mouseY + columnView.contentY);//y-axis
                         var columnIndex = rowIndex !== -1 ? columnView.itemAt(mouseX, mouseY).children[0].indexAt(mouseX, 0) : -1;//x-axis
                         if(rowIndex >= 0 && columnIndex >= 0){
-                            var _end = Qt.point(parent.selectEnd.x, parent.selectEnd.y)
                             parent.selectEnd.y = columnView.indexAt(mouseX, mouseY + columnView.contentY);
                             var lineView = columnView.itemAt(mouseX, mouseY + columnView.contentY).children[0];
                             parent.selectEnd.x = lineView.indexAt(mouseX, 0);
@@ -643,6 +649,7 @@ ApplicationWindow {
                         columnView.selectStart.y === columnView.selectEnd.y)) ?
                       columnView.selectEnd : columnView.selectStart;
 
+            console.log('insert');
             app.currentFile().insert(_sp.y, _sp.x, inputBus.text);
             inputBus.clear();
         }
@@ -651,19 +658,20 @@ ApplicationWindow {
             app.currentFile().insert(columnView._ep.y, columnView._ep.x, '\n');
         }
 
-        //Keys.priority: Keys.AfterItem
+        Keys.priority: Keys.BeforeItem
         Keys.onPressed: {
             if(event.key == Qt.Key_Delete){
+                console.log('delete')
                 app.currentFile().erase(columnView.selectEnd.y, columnView.selectEnd.x);
             }
             else if(event.key == Qt.Key_Backspace){
-                console.log('erase');
+                console.log('backspace');
                 if(columnView.selectStart === columnView.selectEnd){
                     if(columnView.selectEnd.x != 0){
                         app.currentFile().erase(columnView.selectEnd.y, columnView.selectEnd.x - 1);
                     }
                     else{
-                        var endPos = textModel.get(columnView.selectEnd.y - 1).children[0].count - 1;
+                        var endPos = textModel.get(columnView.selectEnd.y - 1).attributes.count - 1;
                         app.currentFile().erase(columnView.selectEnd.y - 1, endPos);
                     }
                 }
@@ -673,10 +681,6 @@ ApplicationWindow {
                     app.currentFile().erase(_sp.y, _sp.x, _ep.y, _ep.x);
                 }
             }
-//            else if(event.key == Qt.Key_Enter){
-//                console.log('enter');
-//                app.currentFile().insert(_sp.y, _sp.x, '\n');
-//            }
         }
 
         /*Handle shortcut event*/
@@ -688,8 +692,9 @@ ApplicationWindow {
         }
         Shortcut{//copy
             id:copyCommand
-            sequence: "Ctrl+C"
+            sequence: StandardKey.Copy //"Ctrl+C"
             onActivated: {
+                console.log("copy");
                 var _sp = columnView.getTruthPoint()["_sp"];
                 var _ep = columnView.getTruthPoint()["_ep"];
                 app.currentFile().copy(_sp.y, _sp.x, _ep.y, _ep.x);
@@ -699,6 +704,7 @@ ApplicationWindow {
             id:pasteCommand
             sequence: "Ctrl+V"
             onActivated: {
+                console.log("paste");
                 var _ep = columnView.getTruthPoint()["_ep"];
                 app.currentFile().paste(_ep.y, _ep.x);
             }
@@ -720,17 +726,10 @@ ApplicationWindow {
     /*Passage Here*/
     ListModel {
         id: textModel
-        ListElement{
-            attributes:[ListElement{description:"t"},ListElement{description:"t"}]
-        }
     }
 
     Connections{
         target: app
-//        onLoaded:{
-//            //TODO:修改文件列表model
-//            currentFile.target = app.currentFile();
-//        }
         onFileLoaded:{
             console.log("loaded");
             for(var i = 0; i < openFiles.count; i++){
