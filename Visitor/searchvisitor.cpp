@@ -5,10 +5,10 @@ SearchVisitor::SearchVisitor(QString format, Qt::CaseSensitivity cs)
 {
     index=-1;
     row_count = 0;
-    line_count= 0;
+    column_count= 0;
     int i = 0;
-    next[0] = -1; //next[0]初始化为-1.  -1表示不存在相同的最大前缀和最大后缀
-    int j = -1;   //j初始化为-1
+    next[0] = -1;  //next[0]初始化为-1.  -1表示不存在相同的最大前缀和最大后缀
+    int j = -1;    //j初始化为-1
     while(i < format.size())
     {
         if(j==-1 || format[i] == format[j] )
@@ -31,14 +31,13 @@ bool SearchVisitor::visit(QChar& element)
     std::pair<int,int> position(0,0);
     if(element!='\n' && index < target.size())
     {
-       line_count++;
-       while(index>-1 && element!=target[index+1])
+       column_count++;
+       while(index>-1 && element!=target[index])
            index=next[index];
-       if( element == target [index+1]  || index == -1 )
-           index++;
+       index++;
        if (index == target.size()-1)
        {
-           position.second = line_count-target.size();
+           position.second = column_count-target.size()+1;
            position.first = row_count;
            result.push_back(position);
            index = -1;
