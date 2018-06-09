@@ -493,6 +493,8 @@ ApplicationWindow {
                                     columnView.selectStart : columnView.selectEnd
             property real lastFlicked: 0
 
+            property var highLightList: []
+
             /*change the state of items, set to high light
              *@params: {Qt.point} startPoint point to start drawing color
              *@params: {number} dl length of drawing
@@ -515,21 +517,22 @@ ApplicationWindow {
                     cursor.fixPosition();
                 }
                 else if (mode === "clear") {//清除状态
-                    for(var i = startPoint.x; i < dl + startPoint.x; i++){
-//                        textModel.get(startPoint.y).attributes.get(i).isHighlight = false;
+                    for(var i = startPoint.x;; i++){
+                        if(textModel.get(startPoint.y).attributes.get(i).isHighlight)
+                            textModel.get(startPoint.y).attributes.get(i).isHighlight = false;
+                        else break;
                     }
-                }
-                else if(mode === 'ck'){//清除选中（跳至下一个）
-//                    textModel.get(startPoint.y).attributes.get(startPoint.x).isSelect = false;
-//                    textModel.get(startPoint.y).attributes.get(startPoint.x + dl - 1).isSelect = false;
                 }
             }
 
             function clearHighlight(){
-                for(var i = 0; i < textModel.count; i++){
-                    for(var j = 0; j < textModel.get(i).attributes.count; j++){
-                        textModel.get(i).attributes.get(j).isHighlight = false;
-                    }
+//                for(var i = 0; i < textModel.count; i++){
+//                    for(var j = 0; j < textModel.get(i).attributes.count; j++){
+//                        textModel.get(i).attributes.get(j).isHighlight = false;
+//                    }
+//                }
+                for(var i = 0; i < columnView.highLightList.length; i++){
+                    columnView.drawHighlightRange(columnView.highLightList[i], null, "clear");
                 }
             }
 
@@ -1011,6 +1014,7 @@ ApplicationWindow {
         onHighlight:{
             console.log(column + ':' + row + ':' + length);
             columnView.drawHighlightRange(Qt.point(column, row), length, 'na');
+            columnView.highLightList.push(Qt.point(column, row));
         }
         onHighlightCurrent:{
             columnView.drawHighlightRange(Qt.point(columnView.selectStart.x, columnView.selectStart.y), length, 'ck');
