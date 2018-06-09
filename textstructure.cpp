@@ -110,7 +110,7 @@ bool TextStructure::erase(std::pair<int, int> position)
           QString merge_string;
           for(int k=0; k<t->size(); k++)   //包括末尾换行符
               merge_string.append((*t)[k]);
-          i->insert(i->size()-1, merge_string);
+          i->insert(i->size(), merge_string);
           qDebug()<<"era";
           text.erase(t);
        }
@@ -139,7 +139,7 @@ bool TextStructure::erase(std::pair<int, int> begin, std::pair<int, int> end)
     QString merge_string;
     for(int k=end.second; k<n->size(); k++)  //including '\n' at the end
         merge_string.append((*n)[k]);
-    m->insert(m->size()-1, merge_string);
+    m->insert(m->size(), merge_string);
     text.erase(n);
 
     qDebug()<<"era";
