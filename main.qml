@@ -308,7 +308,7 @@ ApplicationWindow {
                 id:searchInput
                 anchors.verticalCenter: parent.verticalCenter
                 height: 20
-                width: 255
+                width: 215
                 clip: true
                 font.pixelSize: 20
 
@@ -339,6 +339,30 @@ ApplicationWindow {
                 onClicked: {
                     console.log("show next");
                     app.currentFile().showNext();
+                }
+            }
+            Button{
+                anchors.verticalCenter: parent.verticalCenter
+                height: parent.height
+                width: 40
+                text: "替"
+                onClicked: {
+                    searchMenu.popup();
+                }
+                Menu{
+                    id:searchMenu
+                    Action{
+                        text: '替换'
+                        onTriggered: {
+                            app.currentFile().replaceCurrent(searchInput.text);
+                        }
+                    }
+                    Action{
+                        text: '替换全部'
+                        onTriggered: {
+                            app.currentFile().replaceAll(searchInput.text);
+                        }
+                    }
                 }
             }
             Button{
