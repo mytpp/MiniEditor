@@ -347,7 +347,6 @@ ApplicationWindow {
                     searchInput.clear();
                     searchBar._enable = false;
                     inputBus.focus = true;
-
                 }
             }
         }
