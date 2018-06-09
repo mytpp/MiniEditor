@@ -102,7 +102,7 @@ bool TextFile::saveAs()
 
 bool TextFile::saveFile(QUrl path)
 {
-    file.open(path.url().toLocal8Bit().data(), std::ios::out);
+    file.open(path.url().toLocal8Bit().data()+8, std::ios::out);
     if (file) {
         SaveVisitor save(file);
         bool success = text->traverse(save);
