@@ -184,6 +184,7 @@ ApplicationWindow {
 //                            }
 //                            append('\n');
 //                        }
+                        columnView.drawHighlightRange(Qt.point(0, 0), 5, 'na');
 
                     }
 
@@ -419,13 +420,15 @@ ApplicationWindow {
 //                                                   && index < ((rowRec._index == columnView._ep.y) ? columnView._ep.x : rowView.count) ?
 //                                                      true : false
                         property bool isSelected: isSelect
+                        property bool isHL: isHighlight
                         property string highlightMode: ""
                         text: description
                         font.pixelSize: view.fontPixelSize
                         Rectangle{
                             z:-1 //below text
                             anchors.fill: parent
-                            color: parent.isSelected ? "#5698c3" : (parent.highlightMode == "na" ? "#fed71a" : (parent.highlightMode == "ac" ? "#5698c3" : "white"))
+//                            color: parent.isSelected ? "#5698c3" : (parent.highlightMode == "na" ? "#fed71a" : (parent.highlightMode == "ac" ? "#5698c3" : "white"))
+                            color: (parent.isSelected && parent.isHL) ? "#5698c3" : ((parent.isHL) ? "#fed71a" : "white")
                         }
                     }
                 }
@@ -465,12 +468,20 @@ ApplicationWindow {
              *@params: {string} mode "clear" or "highlight" or maybe more
              */
             function drawHighlightRange(startPoint, dl, mode){
-                var rowTargetItem = columnView.contentItem.children[startPoint.y];
+//                var rowTargetItem = columnView.contentItem.children[startPoint.y];
                 for(var i = startPoint.x; i < dl; i++){
-                    var targetItem = rowTargetItem.children[0].contentItem.children[i];
-                    if(mode === "na") targetItem.highlightMode = "na";
-                    else if(mode === "ac") targetItem.highlightMode = "ac";
-                    else if (mode === "clear") targetItem.highlightMode = "";
+//                    var targetItem = rowTargetItem.children[0].contentItem.children[i];
+                    if(mode === "na") {
+                        textModel.get(startPoint.y).attributes.get(i).isHighlight = true;
+                    }
+
+                    else if(mode === "ac") {
+                        textModel.get(startPoint.y).attributes.get(i).isHighlight = true;
+                    }
+
+                    else if (mode === "clear") {
+                        textModel.get(startPoint.y).attributes.get(i).isHighlight = false;
+                    }
                 }
             }
 
@@ -831,24 +842,24 @@ ApplicationWindow {
             for(var i = 0; i < str.length; i++){
                 var cha = str[i];
                 if(cha !== '\n'){
-                    textModel.get(textModel.count - 1).attributes.append({description: cha, isSelect:false});
+                    textModel.get(textModel.count - 1).attributes.append({description: cha, isSelect:false, isHighlight:false});
                 }
                 else{
-                    textModel.get(textModel.count - 1).attributes.append({description: ' ', isSelect:false});
+                    textModel.get(textModel.count - 1).attributes.append({description: ' ', isSelect:false, isHighlight:false});
                     textModel.append({attributes:[]});
                 }
             }
         }
         onInsertCha:{//插入字符
             if(cha !== '\n'){
-                textModel.get(row).attributes.insert(column, {description: cha, isSelect:false});
+                textModel.get(row).attributes.insert(column, {description: cha, isSelect:false, isHighlight:false});
                 //修复插入后光标位置
                 columnView.selectEnd.x = columnView.selectStart.x = column + 1;
                 columnView.currentItem.children[0].currentIndex = column + 1;
                 cursor.fixPosition();
             }
             else{
-                textModel.insert(row + 1, {attributes:[{description:' ', isSelect:false}]});//插入末尾空字符
+                textModel.insert(row + 1, {attributes:[{description:' ', isSelect:false, isHighlight:false}]});//插入末尾空字符
                 var preLine = textModel.get(row).attributes;
                 //textModel.get(row + 1).attributes.splice(0, 0, preLine.splice(columu, preLine.length - 1 - column));
                 for(var i = preLine.count - 2; i >= column; i--){
@@ -869,7 +880,7 @@ ApplicationWindow {
 
             for(var i = 0; i < str.length; i++){
                 if(str[i] !== '\n'){
-                    textModel.get(_row).attributes.insert(_column, {description: str[i], isSelect:false});
+                    textModel.get(_row).attributes.insert(_column, {description: str[i], isSelect:false, isHighlight:false});
                     columnView.selectEnd.x = columnView.selectStart.x = _column + 1;
                     columnView.currentItem.children[0].currentIndex = _column + 1;
                     _column++;
@@ -878,7 +889,7 @@ ApplicationWindow {
                     var element = {
                         attributes:[]
                     }
-                    element.attributes.push({description:' ', isSelect:false});
+                    element.attributes.push({description:' ', isSelect:false, isHighlight:false});
                     textModel.insert(_row + 1, element);
                     var preLine = textModel.get(_row).attributes;
                     //textModel.at(_row + 1).attributes.splice(0, 0, preLine.splice(_column, preLine.length - 1 - _column));
