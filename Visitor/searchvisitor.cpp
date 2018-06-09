@@ -1,4 +1,5 @@
 #include "searchvisitor.h"
+#include <QDebug>
 
 SearchVisitor::SearchVisitor(QString format, Qt::CaseSensitivity cs)
     :target(format), sensitivity(cs), next(new int [format.size()])

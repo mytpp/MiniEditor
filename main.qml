@@ -305,12 +305,16 @@ ApplicationWindow {
                 clip: true
                 font.pixelSize: 20
 
-                Keys.onPressed: {
-                    if(event.key == Qt.Key_Enter){
-                        console.log('search');
-                        app.currentFile().search(searchInput.text);
-                    }
+                onAccepted: {
+                    console.log('search');
+                    app.currentFile().search(searchInput.text);
                 }
+
+//                Keys.onPressed: {
+//                    if(event.key == Qt.Key_Enter){
+
+//                    }
+//                }
             }
             Button{
                 anchors.verticalCenter: parent.verticalCenter
@@ -921,6 +925,7 @@ ApplicationWindow {
         }
         /*--------高亮操作--------*/
         onHighlight:{
+            console.log('qml high')
             columnView.drawHighlightRange(Qt.point(column, row), length, 'na');
         }
         onHighlightCurrent:{
