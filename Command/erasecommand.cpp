@@ -30,7 +30,7 @@ void EraseCommand::operator()()
         invoker->eraseCha(begin.first, begin.second);
     } else {
         receiver->erase(begin, end);
-        invoker->eraseStr(begin.first, end.first, begin.second, end.second);
+        invoker->eraseStr(begin.first, begin.second, end.first, end.second);
     }
 }
 

@@ -528,9 +528,9 @@ ApplicationWindow {
                             parent.selectStart.x = columnView.itemAt(cursor.x, cursor.y + columnView.contentY).children[0].indexAt(cursor.x, 0);
                             //设置选区终点为当前鼠标所在位置
                             parent.selectEnd.y = columnView.indexAt(mouseX, mouseY + columnView.contentY);
-                            parent.selectEnd.x = columnView.itemAt(mouseX, mouseY + columnView.contentY).children[0].indexAt(mouseX, 0) - 1;
+                            parent.selectEnd.x = columnView.itemAt(mouseX, mouseY + columnView.contentY).children[0].indexAt(mouseX, 0);
                             textModel.get(parent.selectStart.y).attributes.get(parent.selectStart.x).isSelect = true;
-                            textModel.get(parent.selectEnd.y).attributes.get(parent.selectEnd.x).isSelect = true;
+                            textModel.get(parent.selectEnd.y).attributes.get(parent.selectEnd.x - 1).isSelect = true;
                         }
                     }
                     else{
@@ -714,6 +714,7 @@ ApplicationWindow {
                     }
                 }
                 else{
+
                     var _sp = columnView.getTruthPoint()["_sp"];
                     var _ep = columnView.getTruthPoint()["_ep"];
                     app.currentFile().erase(_sp.y, _sp.x, _ep.y, _ep.x);
@@ -933,6 +934,9 @@ ApplicationWindow {
             cursor.fixPosition();
         }
         onEraseStr:{
+            console.log('erase str');
+            console.log(rowBegin + ':' + rowEnd);
+            console.log(columnBegin + ':' + columnEnd);
             if(rowEnd == rowBegin){
                 if(columnEnd - columnBegin == textModel.get(rowBegin).attributes.count){
                     textModel.remove(rowBegin);
