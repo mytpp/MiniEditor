@@ -945,7 +945,7 @@ ApplicationWindow {
                     _column = 0;
                 }
             }
-            //cursor.fixPosition();
+            cursor.fixPosition();
         }
         onEraseCha:{//删除字符
             var nowLine = textModel.get(row).attributes;//当前行
