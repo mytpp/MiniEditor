@@ -87,6 +87,10 @@ ApplicationWindow {
                         onClicked: {
                             openFileTabs.currentIndex = index;
                             textModel.clear();
+                            cursor.x = 0;
+                            cursor.y = 0;
+                            columnView.selectStart.x = columnView.selectEnd.x = 0;
+                            columnView.selectEnd.y = columnView.selectStart.y = 0;
                             app.setCurrentFile(index);
                         }
                     }
@@ -447,6 +451,7 @@ ApplicationWindow {
             height: parent.height
             model: textModel
             delegate: rowComp
+//            cacheBuffer: 0
 
             property bool isSelecting: false
             property point selectStart: Qt.point(0, 0);
@@ -640,7 +645,7 @@ ApplicationWindow {
                 }
                 function fixPosition(){
                     this.x = columnView.currentItem.children[0].currentItem.x;
-                    this.y = columnView.currentItem.y;
+                    this.y = columnView.currentItem.y - columnView.contentY;
                 }
             }
 
@@ -838,11 +843,15 @@ ApplicationWindow {
                 }
             }
 
-            if(!exist){
+            if(!exist) {
                 openFiles.append({name: name});
                 openFileTabs.currentIndex = openFiles.count - 1;
             }
             textModel.clear();
+            cursor.x = 0;
+            cursor.y = 0;
+            columnView.selectStart.x = columnView.selectEnd.x = 0;
+            columnView.selectEnd.y = columnView.selectStart.y = 0;
             currentFile.target = app.currentFile();
             console.log("count "+openFiles.count);
         }
