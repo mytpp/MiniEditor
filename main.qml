@@ -750,12 +750,15 @@ ApplicationWindow {
         /*----------修改Model操作----------*/
         onAppend:{
             if(textModel.count == 0) textModel.append({attributes:[]});
-            if(cha !== '\n'){
-                textModel.get(textModel.count - 1).attributes.append({description: cha});
-            }
-            else{
-                textModel.get(textModel.count - 1).attributes.append({description: ' '});
-                textModel.append({attributes:[]});
+            for(var i = 0; i < str.length; i++){
+                var cha = str[i];
+                if(cha !== '\n'){
+                    textModel.get(textModel.count - 1).attributes.append({description: cha});
+                }
+                else{
+                    textModel.get(textModel.count - 1).attributes.append({description: ' '});
+                    textModel.append({attributes:[]});
+                }
             }
         }
         onInsertCha:{//插入字符
@@ -785,6 +788,7 @@ ApplicationWindow {
             console.log("ins str");
             var _row = row;
             var _column = column;
+
             for(var i = 0; i < str.length; i++){
                 if(str[i] !== '\n'){
                     textModel.get(_row).attributes.insert(_column, {description: str[i]});

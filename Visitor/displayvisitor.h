@@ -2,6 +2,7 @@
 #define DISPLAYVISITOR_H
 
 #include "abstractvisitor.h"
+#include <QString>
 
 class TextFile;
 
@@ -19,6 +20,7 @@ private:
     TextFile *background;
     //since we can't avoid breaking a line into QChars and display them on by one,
     //we'd better do this in C++， not in QML
+    QString line;
 };
 
 #endif // DISPLAYVISITOR_H
