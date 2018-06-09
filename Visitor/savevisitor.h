@@ -15,6 +15,7 @@ public:
 
 private:
     std::fstream &to;
+    bool lineBreaking;
 };
 
 #endif // SAVEVISITOR_H
