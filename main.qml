@@ -902,8 +902,8 @@ ApplicationWindow {
 
         /*----------修改Model操作----------*/
         onAppend:{
+            //console.log(str);
             if(textModel.count == 0) textModel.append({attributes:[]});
-            console.log(str);
             for(var i = 0; i < str.length; i++){
                 var cha = str[i];
                 if(cha !== '\n'){
@@ -913,7 +913,6 @@ ApplicationWindow {
                     textModel.get(textModel.count - 1).attributes.append({description: ' ', isSelect:false, isHighlight:false});
                     textModel.append({attributes:[]});
                 }
-                //columnView.forceLayout();
             }
         }
         onInsertCha:{//插入字符
@@ -969,7 +968,7 @@ ApplicationWindow {
                     _column = 0;
                 }
             }
-            //cursor.fixPosition();
+            cursor.fixPosition();
         }
         onEraseCha:{//删除字符
             var nowLine = textModel.get(row).attributes;//当前行
