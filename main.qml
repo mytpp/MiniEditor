@@ -350,6 +350,7 @@ ApplicationWindow {
 
                 onClicked: {
                     searchInput.clear();
+                    columnView.clearHighlight();
                     searchBar._enable = false;
                     inputBus.focus = true;
                 }
@@ -475,24 +476,39 @@ ApplicationWindow {
              *@params: {string} mode "clear" or "highlight" or maybe more
              */
             function drawHighlightRange(startPoint, dl, mode){
-                if(mode === 'na'){
+                if(mode === 'na'){//仅高亮
                     for(var i = startPoint.x; i < dl + startPoint.x; i++){
                         textModel.get(startPoint.y).attributes.get(i).isHighlight = true;
                     }
                 }
-                else if (mode === 'ac'){
+                else if (mode === 'ac'){//选中
                     textModel.get(startPoint.y).attributes.get(startPoint.x).isSelect = true;
                     columnView.selectStart.x = startPoint.x;
-                    columnView.selectEnd.x = startPoint.x + dl - 1;
+                    columnView.selectEnd.x = startPoint.x + dl;
                     columnView.selectStart.y = columnView.selectEnd.y = startPoint.y;
                     textModel.get(startPoint.y).attributes.get(startPoint.x + dl - 1).isSelect = true;
                     columnView.currentIndex = startPoint.y;
                     columnView.currentItem.children[0].currentIndex = startPoint.x + dl;
                     cursor.fixPosition();
                 }
-                else if (mode === "clear") {
+                else if (mode === "clear") {//清除状态
                     for(var i = startPoint.x; i < dl + startPoint.x; i++){
-                        textModel.get(startPoint.y).attributes.get(i).isHighlight = true;
+                        textModel.get(startPoint.y).attributes.get(i).isHighlight = false;
+                    }
+                }
+                else if(mode === 'ck'){//清除选中（跳至下一个）
+                    textModel.get(startPoint.y).attributes.get(startPoint.x).isSelect = false;
+                    textModel.get(startPoint.y).attributes.get(startPoint.x + dl - 1).isSelect = false;
+                }
+            }
+
+            function clearHighlight(){
+                for(var i = 0; i < textModel.count; i++){
+                    for(var j = 0; j < textModel.get(i).attributes.count; j++){
+                        if(textModel.get(i).attributes.get(j).isHighlight){
+                            textModel.get(i).attributes.get(j).isHighlight = false;
+                        }
+                        columnView.forceLayout();
                     }
                 }
             }
@@ -863,6 +879,7 @@ ApplicationWindow {
         /*----------修改Model操作----------*/
         onAppend:{
             if(textModel.count == 0) textModel.append({attributes:[]});
+            console.log(str);
             for(var i = 0; i < str.length; i++){
                 var cha = str[i];
                 if(cha !== '\n'){
@@ -872,6 +889,7 @@ ApplicationWindow {
                     textModel.get(textModel.count - 1).attributes.append({description: ' ', isSelect:false, isHighlight:false});
                     textModel.append({attributes:[]});
                 }
+                //columnView.forceLayout();
             }
         }
         onInsertCha:{//插入字符
@@ -901,7 +919,6 @@ ApplicationWindow {
             console.log("ins str");
             var _row = row;
             var _column = column;
-
             for(var i = 0; i < str.length; i++){
                 if(str[i] !== '\n'){
                     textModel.get(_row).attributes.insert(_column, {description: str[i], isSelect:false, isHighlight:false});
@@ -928,7 +945,7 @@ ApplicationWindow {
                     _column = 0;
                 }
             }
-            cursor.fixPosition();
+            //cursor.fixPosition();
         }
         onEraseCha:{//删除字符
             var nowLine = textModel.get(row).attributes;//当前行
@@ -1017,6 +1034,7 @@ ApplicationWindow {
             columnView.drawHighlightRange(Qt.point(column, row), length, 'na');
         }
         onHighlightCurrent:{
+            columnView.drawHighlightRange(Qt.point(columnView.selectStart.x, columnView.selectStart.y), length, 'ck');
             columnView.drawHighlightRange(Qt.point(column, row), length, 'ac');
         }
         onFileDestroyed: {
