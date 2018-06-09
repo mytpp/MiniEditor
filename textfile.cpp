@@ -157,7 +157,7 @@ void TextFile::highlightAll(int length)
     auto& result = searchVisitor->getResult();
     for(const auto &e: result) {
         emit highlight(e.first, e.second, length);
-        qDebug()<<"highlight";
+        qDebug()<<"result:"<<e.first<<e.second;
     }
 }
 
@@ -171,7 +171,6 @@ bool TextFile::search(QString format, Qt::CaseSensitivity cs)
         return false;
     }
 
-    qDebug()<<"before emit";
     highlightAll(format.size());
     currentSearchResult = searchVisitor->getResult().begin();
     emit highlightCurrent(currentSearchResult->first, currentSearchResult->second, format.size());
