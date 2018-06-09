@@ -62,7 +62,7 @@ signals:
     //cha and str may contain '\n', which need special handling in QML
     void insertCha(int row, int column, QChar cha);
     void insertStr(int row, int column, QString str);
-    void append(QChar cha); //for loading file (DisplayVisitor)
+    void append(QString str); //for loading file (DisplayVisitor)
 
     void eraseCha(int row, int column);
     //erase content between {rowBegin, colBegin}(included) and {rowEnd, colEnd}(excluded)

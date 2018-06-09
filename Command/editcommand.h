@@ -18,13 +18,6 @@ public:
     virtual void undo() {}
     virtual void redo() {}
 
-//protected:
-//    virtual void insert() {}
-//    virtual void erase() {}
-
-//    //by EditCommand::invoker()
-//    virtual void sendInsertSignal() {}
-//    virtual void sendEraseSignal() {}
 };
 
 #endif // EDITCOMMAND_H

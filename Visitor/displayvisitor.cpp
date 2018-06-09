@@ -2,14 +2,19 @@
 #include "textfile.h"
 
 DisplayVisitor::DisplayVisitor(TextFile *src)
-    : background(src)
+    : background(src),
+      line()
 {
 
 }
 
 bool DisplayVisitor::visit(QChar& element)
 {
-    background->append(element); //emit signal
+    line.append(element);
+    if(element == QChar('\n')) {
+        emit background->append(line);
+        line.clear();
+    }
     return true;
 }
 
