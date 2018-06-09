@@ -33,7 +33,7 @@ private:
     int *next;               //the 'next' array, remeber to release it
     int index;
     int row_count;     //the total number of rows that heve been traversed
-    int line_count;    //the total number of QChars that heve been traversed in a row
+    int column_count;    //the total number of QChars that heve been traversed in a row
     std::vector<std::pair<int,int>> result; //position of the first character of each matched string
 };
 
