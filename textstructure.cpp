@@ -79,10 +79,14 @@ bool TextStructure::insert(std::pair<int, int> position, QString newString)
     {
         if(newString[j]=='\n'){
             QString rest = data(position, {position.first, i->size()-1});
+
             i->erase(position.second, i->size()-1);
             i->insert(position.second, slice);
             text.emplace(++i, rest);
+
+            --i;
             position.second = 0;
+            position.first++;
             slice.clear();
         } else {
             slice.append(newString[j]);

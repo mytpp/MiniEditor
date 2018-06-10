@@ -2,7 +2,6 @@
 #include "visitor\abstractvisitor.h"
 #include <iterator>
 
-
 /*构造函数*/
 /*为新行插入一个换行符，且预留50个字符的空间*/
 TextRow::TextRow()
@@ -88,9 +87,6 @@ bool TextRow::insert(int position, QString str)
     for(int i=position; i<position+length; ++i)
         row[i] = str[i-position];
 
-//    qDebug()<<"row after ins:";
-//    for(auto e: row)
-//        qDebug()<<e;
     return true;
 }
 
