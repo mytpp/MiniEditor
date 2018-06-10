@@ -17,13 +17,11 @@ SOURCES += main.cpp \
     textrow.cpp \
     textfile.cpp \
     application.cpp \
-    Visitor/abstractvisitor.cpp \
     Visitor/displayvisitor.cpp \
     Visitor/searchvisitor.cpp \
     Command/insertcommand.cpp \
     Command/erasecommand.cpp \
     Command/replacecommand.cpp \
-    Command/editcommand.cpp \
     Visitor/savevisitor.cpp
 
 RESOURCES += qml.qrc

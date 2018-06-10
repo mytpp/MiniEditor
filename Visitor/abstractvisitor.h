@@ -6,8 +6,8 @@
 class AbstractVisitor
 {
 public:
-    AbstractVisitor();
-    virtual ~AbstractVisitor();
+    AbstractVisitor() {}
+    virtual ~AbstractVisitor() {}
 
     virtual bool visit(QChar& element) = 0;
 

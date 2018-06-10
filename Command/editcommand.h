@@ -11,12 +11,12 @@ class TextStructure;
 class EditCommand
 {
 public:
-    EditCommand();
-    virtual ~EditCommand();
+    EditCommand() {}
+    virtual ~EditCommand() {}
 
     virtual void operator()() = 0;
-    virtual void undo() {}
-    virtual void redo() {}
+    virtual void undo()       = 0;
+    virtual void redo()       = 0;
 
 };
 
