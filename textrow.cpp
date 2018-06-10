@@ -1,4 +1,4 @@
-#include "textrow.h"
+﻿#include "textrow.h"
 #include "visitor\abstractvisitor.h"
 #include <iterator>
 
@@ -34,7 +34,7 @@ TextRow::TextRow(QString text)
      return row.capacity();
  }
 
- /*运算符重载*/
+/*运算符重载*/
 QChar TextRow::operator[](int position)const
 {
     return row[position];
@@ -59,7 +59,6 @@ bool TextRow::insert(int position, QChar cha)
     row.insert(i,cha);
     return true;
 }
-
 
 /*插入字符串*/
 bool TextRow::insert(int position, QString str)
@@ -101,9 +100,9 @@ bool TextRow::insert(int position, QString str)
 
 
 /*删除一行中position位置上的字符*/
-bool TextRow::erase(int position)     //position从第零位开始计
+bool TextRow::erase(int position)//position从第零位开始计
 {
-    int current_size = row.size();    //是否考虑换行符也算一个字符？？
+    int current_size = row.size();//是否考虑换行符也算一个字符？？
 
     //considering the position is undesirable
     if(  position > current_size - 1  )
@@ -117,7 +116,7 @@ bool TextRow::erase(int position)     //position从第零位开始计
 
 
 /*删除区间为[begin,end)，左闭右开*/
-/*begin和end直接表示下标 ，删除到end的前一位，*/
+/*begin和end直接表示下标 ，删除到end的前一位*/
 bool TextRow::erase(int begin, int end)
 {
     int current_size = row.size();

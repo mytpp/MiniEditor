@@ -1,4 +1,4 @@
-#include "searchvisitor.h"
+﻿#include "searchvisitor.h"
 #include <QDebug>
 
 /*构造函数*/
@@ -41,7 +41,7 @@ SearchVisitor::~SearchVisitor()
 }
 
 
-/*遍历，kmp算法求匹配*/
+/*遍历kmp算法求匹配*/
 bool SearchVisitor::visit(QChar& element)
 {   
     std::pair<int,int> position(0,0);

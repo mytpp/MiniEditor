@@ -1,4 +1,4 @@
-#include "textstructure.h"
+﻿#include "textstructure.h"
 #include "Visitor/abstractvisitor.h"
 
 /*构造函数*/
