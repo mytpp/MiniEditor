@@ -9,7 +9,7 @@ ApplicationWindow {
     visible: true
     width: 1280
     height: 720
-    title: qsTr("Scroll")
+    title: qsTr("MiniEditor")
 
     FileDialog {
         id: fileDialog
@@ -855,6 +855,7 @@ ApplicationWindow {
         }
         onInsertStr:{//插入字符串
             console.log("ins str");
+            console.log(str);
             var _row = row;
             var _column = column;
             for(var i = 0; i < str.length; i++){
@@ -872,7 +873,7 @@ ApplicationWindow {
                     textModel.insert(_row + 1, element);
                     var preLine = textModel.get(_row).attributes;
                     for(var j = preLine.count - 2; j >= _column; j--){
-                        textModel.get(row + 1).attributes.insert(0, preLine.get(j));
+                        textModel.get(_row + 1).attributes.insert(0, preLine.get(j));
                         preLine.remove(j);
                     }
                     columnView.selectStart.x = columnView.selectEnd.x = 0;
