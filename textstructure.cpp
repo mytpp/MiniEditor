@@ -1,13 +1,13 @@
 #include "textstructure.h"
 #include "Visitor/abstractvisitor.h"
 
-
+/*构造函数*/
 TextStructure::TextStructure()
 {
     text.push_back(TextRow());
 }
 
-/*------返回position位置上的QChar------*/
+/*返回position位置上的QChar*/
 QChar TextStructure::data(std::pair<int,int> position) const
 {
     auto i = text.begin();
@@ -17,7 +17,7 @@ QChar TextStructure::data(std::pair<int,int> position) const
 }
 
 
-/*------返回begin和end之间的QString------*/
+/*返回begin和end之间的QString*/
 const QString TextStructure::data(std::pair<int, int> begin, std::pair<int, int> end)const
 {
     QString result="";
@@ -48,7 +48,7 @@ const QString TextStructure::data(std::pair<int, int> begin, std::pair<int, int>
     return result;
 }
 
-
+/*插入字符*/
 bool TextStructure::insert(std::pair<int, int> position, QChar character)
 {
     auto i = text.begin();
@@ -59,6 +59,7 @@ bool TextStructure::insert(std::pair<int, int> position, QChar character)
         QString rest = data(position, {position.first, i->size()-1});
         i->erase(position.second, i->size()-1);
         text.emplace(++i, rest);
+
     }
     else
        i->insert(position.second, character);
@@ -66,6 +67,7 @@ bool TextStructure::insert(std::pair<int, int> position, QChar character)
     return true;
 }
 
+/*插入字符串*/
 bool TextStructure::insert(std::pair<int, int> position, QString newString)
 {
     int length=newString.size();
@@ -75,7 +77,8 @@ bool TextStructure::insert(std::pair<int, int> position, QString newString)
     qDebug()<<"ins pos: x:"<<position.first<<" y: "<<position.second;
     int j;
     QString slice;
-    for(j=0;j<length;j++){
+    for(j=0;j<length;j++)
+    {
         if(newString[j]=='\n'){
             QString rest = data(position, {position.first, i->size()-1});
             i->erase(position.second, i->size()-1);
@@ -93,6 +96,7 @@ bool TextStructure::insert(std::pair<int, int> position, QString newString)
     return true;
 }
 
+/*删除字符*/
 bool TextStructure::erase(std::pair<int, int> position)
 {
     auto i = text.begin();
@@ -120,6 +124,7 @@ bool TextStructure::erase(std::pair<int, int> position)
     return true;
 }
 
+/*删除字符串*/
 bool TextStructure::erase(std::pair<int, int> begin, std::pair<int, int> end)
 {
     auto m =text.begin();
