@@ -1,11 +1,11 @@
-#include <iterator>
+﻿#include <iterator>
 #include "application.h"
 #include <QDebug>
 
-Application::Application()
+Application::Application(QQmlContext* tr)
     :openFiles(),
       current(openFiles.end())
-{ }
+{ root = tr;}
 
 void Application::addFile(QUrl address)
 {
@@ -30,7 +30,10 @@ void Application::setCurrentFile(int index)
 
 void Application::setCurrentFile(std::list<TextFile>::iterator index)
 {
+
+    qDebug()<<"set cf";
     current = index;
+    root->setContextProperty("cF", &(*current));
     emit fileLoaded(current->fileName());
     current->display();
 }

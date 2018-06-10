@@ -1,9 +1,10 @@
-#ifndef APPLICATION_H
+﻿#ifndef APPLICATION_H
 #define APPLICATION_H
 
 #include <QObject>
 #include <list>
 #include <QUrl>
+#include <QQmlContext>
 #include "textfile.h"
 
 
@@ -11,7 +12,7 @@ class Application: public QObject
 {
     Q_OBJECT
 public:
-    Application();
+    Application(QQmlContext*);
 
     //triggered by 'open' button
     Q_INVOKABLE void addFile(QUrl address = QUrl());
@@ -47,6 +48,7 @@ private:
     //support multi-file edition
     std::list<TextFile> openFiles;
     std::list<TextFile>::iterator current;
+    QQmlContext* root;
 };
 
 #endif // APPLICATION_H
