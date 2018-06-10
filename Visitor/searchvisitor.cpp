@@ -1,5 +1,4 @@
 ﻿#include "searchvisitor.h"
-#include <QDebug>
 
 /*构造函数*/
 /*初始化*/

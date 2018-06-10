@@ -88,13 +88,9 @@ bool TextRow::insert(int position, QString str)
     for(int i=position; i<position+length; ++i)
         row[i] = str[i-position];
 
-    qDebug()<<"row after ins:";
-    for(auto e: row)
-        qDebug()<<e;
-
-//    qDebug()<<"num:";
-//    int i=0;
-//    for()
+//    qDebug()<<"row after ins:";
+//    for(auto e: row)
+//        qDebug()<<e;
     return true;
 }
 

@@ -3,7 +3,6 @@
 
 #include <vector>
 #include <QString>
-#include<QDebug>
 
 class AbstractVisitor;
 

@@ -14,15 +14,15 @@ class Application: public QObject
 public:
     Application(QQmlContext*);
 
-    //triggered by 'open' button
+    //triggered by 'open' or 'new' button
     Q_INVOKABLE void addFile(QUrl address = QUrl());
 
     //the three function is for currentFile
-    //when save(As)?() is called, remeber to ask for URL when necessary
+    //when save(As)() is called, ask for URL when necessary
     Q_INVOKABLE void save();
     Q_INVOKABLE void saveAs();
-    //close current file
-    //remeber to check if the file need saving
+
+    //close current file and check if the file need saving
     Q_INVOKABLE bool close();
 
     //close all files, triggered by 'quit' button

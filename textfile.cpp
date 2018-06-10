@@ -12,7 +12,6 @@
 #include "Command/erasecommand.h"
 #include "Command/insertcommand.h"
 #include "Command/replacecommand.h"
-#include <QDebug>
 
 
 TextFile::TextFile()
@@ -26,7 +25,6 @@ TextFile::TextFile()
       historyList(),
       nextCommand(historyList.end())
 {
-    qDebug()<<"Empty TextFile Construted";
 }
 
 TextFile::TextFile(QUrl address)
@@ -41,6 +39,7 @@ TextFile::TextFile(QUrl address)
       nextCommand(historyList.end())
 {
     if(file) {
+        //read the file line by line
         std::string line;
         QString line_16bit;
         for (int i=0; std::getline(file, line); i++) {
@@ -67,7 +66,6 @@ TextFile::TextFile(const TextFile &afile)
       historyList(),
       nextCommand(historyList.end())
 {
-    qDebug()<<"TextFile Copy Constructed";
 }
 
 TextFile::~TextFile() {
@@ -82,7 +80,6 @@ void TextFile::display()
 
 bool TextFile::save()
 {
-    qDebug()<<"save?";
     if(url.isEmpty()) //if the file has not been stored, call saveAs()
         return saveAs();
     else
@@ -128,8 +125,8 @@ bool TextFile::canClose()
         if (pressed == QMessageBox::Save)
             return save();
         else if (pressed == QMessageBox::Cancel)
-            return false;
-        return true;     //refuse to save (Discard)
+            return false;  //cancel means regret closing, so "can't close"
+        return true;       //refuse to save (Discard)
     } else {
         return true;
     }
@@ -156,21 +153,16 @@ void TextFile::addCommand(std::unique_ptr<EditCommand> &&command)
 void TextFile::highlightAll(int length)
 {
     auto& result = searchVisitor->getResult();
-    for(const auto &e: result) {
+    for(const auto &e: result)
         emit highlight(e.first, e.second, length);
-        qDebug()<<"result:"<<e.first<<e.second;
-    }
 }
 
 bool TextFile::search(QString format, Qt::CaseSensitivity cs)
 {
-    qDebug()<<"txtfile search";
     searchVisitor = std::make_unique<SearchVisitor>(format,cs);
     text->traverse(*searchVisitor);
-    if(searchVisitor->noResult()){
-        qDebug()<<"no re";
+    if(searchVisitor->noResult())
         return false;
-    }
 
     highlightAll(format.size());
     currentSearchResult = searchVisitor->getResult().begin();
@@ -268,7 +260,6 @@ void TextFile::paste(int row, int column)
 
 void TextFile::insert(int row, int column, QChar character)
 {
-    qDebug()<<"ins cha";
     auto insertCommand = std::make_unique<InsertCommand>(
                std::make_pair(row, column), character, text, this);
     (*insertCommand)();
@@ -277,7 +268,6 @@ void TextFile::insert(int row, int column, QChar character)
 
 void TextFile::insert(int row, int column, QString newString)
 {
-    qDebug()<<"ins str";
     auto insertCommand = std::make_unique<InsertCommand>(
                std::make_pair(row, column), newString, text, this);
     (*insertCommand)();

@@ -44,7 +44,6 @@ const QString TextStructure::data(std::pair<int, int> begin, std::pair<int, int>
              result.append(append_char);
          }
     }
-    qDebug()<<"data return value"<<result;
     return result;
 }
 
@@ -74,7 +73,6 @@ bool TextStructure::insert(std::pair<int, int> position, QString newString)
     auto i = text.begin();
     advance(i,position.first);
 
-    qDebug()<<"ins pos: x:"<<position.first<<" y: "<<position.second;
     int j;
     QString slice;
     for(j=0;j<length;j++)
@@ -115,12 +113,10 @@ bool TextStructure::erase(std::pair<int, int> position)
           for(int k=0; k<t->size(); k++)   //包括末尾换行符
               merge_string.append((*t)[k]);
           i->insert(i->size(), merge_string);
-          qDebug()<<"era";
           text.erase(t);
        }
     }
 
-    qDebug()<<"era";
     return true;
 }
 
@@ -147,7 +143,6 @@ bool TextStructure::erase(std::pair<int, int> begin, std::pair<int, int> end)
     m->insert(m->size(), merge_string);
     text.erase(n);
 
-    qDebug()<<"era";
     return true;
 }
 

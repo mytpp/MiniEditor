@@ -25,8 +25,10 @@ public:
 private:
     //just call getResult() from this visitor
     std::unique_ptr<SearchVisitor> visitor;
+
     //for undo() and redo()
     QString newString;
+
     //to emit modification signal through _invoker(a TextFile)
     TextFile *invoker;
     std::shared_ptr<TextStructure> receiver;

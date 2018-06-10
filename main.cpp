@@ -20,7 +20,6 @@ int main(int argc, char *argv[])
     /*Load Fonts*/
     int FontDatabase = QFontDatabase::addApplicationFont(":/assets/fonts/fontawesome-webfont.ttf");
     QStringList loadedFontFamilies = QFontDatabase::applicationFontFamilies(FontDatabase);
-    if(!loadedFontFamilies.isEmpty()) qDebug() << loadedFontFamilies.at(0) << "\n";
 
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
     if (engine.rootObjects().isEmpty())

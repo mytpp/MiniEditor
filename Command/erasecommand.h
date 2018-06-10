@@ -11,21 +11,20 @@ public:
     EraseCommand(std::pair<int,int> begin, std::pair<int,int> end,
                  std::shared_ptr<TextStructure> rec, TextFile *inv = nullptr);
 
-    //consists of doCut(); erase(); sendEraseSignal();
     virtual void operator ()() override;
-    //consists of insert(); sendInsertSignal();
     virtual void undo() override;
-    //consists of doCut(); erase(); sendEraseSignal();
     virtual void redo() override;
 
 private:
     enum {CHA, STR} token;
     std::pair<int,int> begin;
     std::pair<int,int> end;
+
     //before delete sth from the structure, store it for undo()
-    //may contain '\n'. caution
+    //may contain '\n'
     QChar character;
     QString chunk;
+
     //to emit modification signal through _invoker(a TextFile)
     TextFile *invoker;
     std::shared_ptr<TextStructure> receiver;

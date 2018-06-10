@@ -1,6 +1,5 @@
 #include "savevisitor.h"
 #include <QString>
-#include <QDebug>
 
 SaveVisitor::SaveVisitor(std::fstream &dest)
     : to(dest),
