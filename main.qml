@@ -30,9 +30,6 @@ ApplicationWindow {
         color: '#2983bb'
         ListModel{
             id:openFiles
-//            ListElement{
-//                name:'社会主义从空想到科学的发展'
-//            }
         }
 
         ListView{
@@ -168,39 +165,6 @@ ApplicationWindow {
                     }
                 }
                 ToolSeparator {}
-                ToolButton {//test
-                    id:boomer
-                    text: "boom"
-                    onClicked: {
-                        //textModel.get(0).attributes.remove(0, 5);
-                        //insertCha(columnView._ep.x, columnView._ep.y, '\n');
-                        //insertStr(columnView._ep.x, columnView._ep.y, 'The quick brown fox jumps over the lazy dog\n The quick brown fox jump sover the lazy dog');
-                        //eraseCha(columnView._ep.x, columnView._ep.y);
-                        //eraseStr(columnView._sp.x, columnView._sp.y, columnView._ep.x, columnView._ep.y);
-                        for(var i = 0; i < 100; i++){
-                            textModel.append({attributes:[]});
-                            for(var j = 0; j < 45; j++){
-                                textModel.get(i).attributes.append({description: j.toString(), isHighlight:false});
-                            }
-                        }
-                        currentFile.target = cF;
-//                        for(var i = 0; i < 300; i++){
-//                            for(var j = 0; j < 20; j++){
-//                                append('F');
-//                            }
-//                            append('\n');
-//                        }
-                        //columnView.drawHighlightRange(Qt.point(0, 0), 5, 'na');
-//                        columnView.model = textModel;
-
-                    }
-
-                    signal insertCha(int column,int row,string cha);
-                    signal insertStr(int column, int row, string str);
-                    signal eraseCha(int column, int row);
-                    signal eraseStr(int columnBegin, int rowBegin, int columnEnd, int rowEnd);
-                    signal append(string cha);
-                }
             }
             Row{
                 ToolButton {//menu
@@ -454,9 +418,9 @@ ApplicationWindow {
                         text: description
                         font.pixelSize: view.fontPixelSize
                         property bool isSelected: (rowRec.isSelected
-                                                                           && index >= ((rowRec._index === columnView._sp.y) ? columnView._sp.x : 0)
-                                                                           && index < ((rowRec._index === columnView._ep.y) ? columnView._ep.x : rowView.count)) ?
-                                                                              true : false
+                                                   && index >= ((rowRec._index === columnView._sp.y) ? columnView._sp.x : 0)
+                                                   && index < ((rowRec._index === columnView._ep.y) ? columnView._ep.x : rowView.count)) ?
+                                                      true : false
                         Rectangle{
                             z:-1 //below text
                             anchors.fill: parent
@@ -507,11 +471,9 @@ ApplicationWindow {
                     }
                 }
                 else if (mode === 'ac'){//选中
-//                    textModel.get(startPoint.y).attributes.get(startPoint.x).isSelect = true;
                     columnView.selectStart.x = startPoint.x;
                     columnView.selectEnd.x = startPoint.x + dl;
                     columnView.selectStart.y = columnView.selectEnd.y = startPoint.y;
-//                    textModel.get(startPoint.y).attributes.get(startPoint.x + dl - 1).isSelect = true;
                     columnView.currentIndex = startPoint.y;
                     columnView.currentItem.children[0].currentIndex = startPoint.x + dl;
                     cursor.fixPosition();
@@ -526,11 +488,6 @@ ApplicationWindow {
             }
 
             function clearHighlight(){
-//                for(var i = 0; i < textModel.count; i++){
-//                    for(var j = 0; j < textModel.get(i).attributes.count; j++){
-//                        textModel.get(i).attributes.get(j).isHighlight = false;
-//                    }
-//                }
                 for(var i = 0; i < columnView.highLightList.length; i++){
                     columnView.drawHighlightRange(columnView.highLightList[i], null, "clear");
                 }
@@ -601,7 +558,7 @@ ApplicationWindow {
                 onReleased: {
                     if(!parent.isSelecting){
                         var rowIndex = columnView.indexAt(mouseX, mouseY + columnView.contentY);//y-axis
-                        var columnIndex = rowIndex !== -1 ? columnView.itemAt(mouseX, mouseY).children[0].indexAt(mouseX, 0) : -1;//x-axis
+                        var columnIndex = rowIndex !== -1 ? columnView.itemAt(mouseX, mouseY + columnView.contentY).children[0].indexAt(mouseX, 0) : -1;//x-axis
                         if(rowIndex >= 0 && columnIndex >= 0){
                             var _end = Qt.point(parent.selectEnd.x, parent.selectEnd.y)
                             parent.selectEnd.y = columnView.indexAt(mouseX, mouseY + columnView.contentY);
@@ -693,7 +650,7 @@ ApplicationWindow {
                       columnView.selectEnd : columnView.selectStart;
 
             console.log('insert');
-            app.currentFile().insert(_sp.y, _sp.x, inputBus.text);
+            cF.insert(_sp.y, _sp.x, inputBus.text);
             inputBus.clear();
         }
         onAccepted: {
@@ -885,7 +842,6 @@ ApplicationWindow {
             else{
                 textModel.insert(row + 1, {attributes:[{description:' ', isHighlight:false}]});//插入末尾空字符
                 var preLine = textModel.get(row).attributes;
-                //textModel.get(row + 1).attributes.splice(0, 0, preLine.splice(columu, preLine.length - 1 - column));
                 for(var i = preLine.count - 2; i >= column; i--){
                     textModel.get(row + 1).attributes.insert(0, preLine.get(i));
                     preLine.remove(i);
@@ -915,7 +871,6 @@ ApplicationWindow {
                     element.attributes.push({description:' ', isHighlight:false});
                     textModel.insert(_row + 1, element);
                     var preLine = textModel.get(_row).attributes;
-                    //textModel.at(_row + 1).attributes.splice(0, 0, preLine.splice(_column, preLine.length - 1 - _column));
                     for(var j = preLine.count - 2; j >= _column; j--){
                         textModel.get(row + 1).attributes.insert(0, preLine.get(j));
                         preLine.remove(j);

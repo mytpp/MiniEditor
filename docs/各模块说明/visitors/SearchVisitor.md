@@ -1,4 +1,4 @@
-#SearchVisistor class
+# SearchVisistor class
 查找字符串
 
 | 头文件 | #include "abstractvisitor.h" |
