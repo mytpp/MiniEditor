@@ -52,3 +52,6 @@ HEADERS += \
     Command/replacecommand.h \
     Command/editcommand.h \
     Visitor/savevisitor.h
+
+INCLUDEPATH += "C:/Program Files (x86)/Windows Kits/10/Include/10.0.15063.0/ucrt"
+LIBS += -L"C:/Program Files (x86)/Windows Kits/10/Lib/10.0.15063.0/ucrt/x64"
