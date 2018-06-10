@@ -797,16 +797,16 @@ ApplicationWindow {
                 console.log("copy");
                 var _sp = columnView.getTruthPoint()["_sp"];
                 var _ep = columnView.getTruthPoint()["_ep"];
-                app.currentFile().copy(_sp.y, _sp.x, _ep.y, _ep.x);
+                cF.copy(_sp.y, _sp.x, _ep.y, _ep.x);
             }
         }
         Shortcut{//paste
             id:pasteCommand
-            sequence: "Ctrl+V"
+            sequence: StandardKey.Paste//"Ctrl+V"
             onActivated: {
                 console.log("paste");
                 var _ep = columnView.getTruthPoint()["_ep"];
-                app.currentFile().paste(_ep.y, _ep.x);
+                cF.paste(_ep.y, _ep.x);
             }
         }
         Shortcut{//undo
