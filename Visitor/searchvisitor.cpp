@@ -1,6 +1,9 @@
 #include "searchvisitor.h"
 #include <QDebug>
 
+/*构造函数*/
+/*初始化*/
+/*构造format模式串的next数组*/
 SearchVisitor::SearchVisitor(QString format, Qt::CaseSensitivity cs)
     :target(format), sensitivity(cs), next(new int [format.size()]),
       index(0), row_count(0), column_count(0)
@@ -21,6 +24,8 @@ SearchVisitor::SearchVisitor(QString format, Qt::CaseSensitivity cs)
     }
 }
 
+
+/*按照cs标准，判断a与b是否相等*/
 bool SearchVisitor:: equal(QChar a, QChar b)
 {
     if(sensitivity==Qt::CaseSensitive)
@@ -29,11 +34,14 @@ bool SearchVisitor:: equal(QChar a, QChar b)
         return a.toLower()==b.toLower();
 }
 
+/*析构函数*/
 SearchVisitor::~SearchVisitor()
 {
     delete [] next;
 }
 
+
+/*遍历，kmp算法求匹配*/
 bool SearchVisitor::visit(QChar& element)
 {   
     std::pair<int,int> position(0,0);
@@ -64,17 +72,21 @@ bool SearchVisitor::visit(QChar& element)
     return false;
 }
 
+/*返回模式串format的内容*/
 const QString& SearchVisitor::getFormat() const
 {
     return target;
 }
 
+
+/*返回匹配结果*/
 std::vector<std::pair<int,int>>& SearchVisitor::getResult()
 {
 
     return result;
 }
 
+/*标识匹配是否成功*/
 bool SearchVisitor::noResult()
 {
     return result.empty();
